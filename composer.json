@@ -1,0 +1,43 @@
+{
+    "name": "phpdevcommunity/michel-core",
+    "description": "The Michel Framework Core is the core library of the Michel Framework, a lightweight and versatile PHP framework designed for simplifying web development tasks.",
+    "type": "package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "F. Michel",
+            "homepage": "https://www.phpdevcommunity.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "PhpDevCommunity\\Michel\\Core\\": "src",
+            "Test\\PhpDevCommunity\\Michel\\Core\\": "tests"
+        },
+        "files": [
+            "src/helpers.php",
+            "src/helpers_file.php",
+            "src/helpers_string.php",
+            "src/helpers_array.php",
+            "src/helpers_date.php"
+        ]
+    },
+    "require": {
+        "php": ">=7.4",
+        "ext-json": "*",
+        "psr/container": "^1.0",
+        "psr/http-message": "~1.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/log": "^1.1",
+        "phpdevcommunity/php-dotenv": "^3.0",
+        "phpdevcommunity/php-options-resolver": "^1.0",
+        "symfony/console": "^5.4"
+    },
+    "minimum-stability": "alpha",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
+}
