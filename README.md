@@ -169,12 +169,12 @@ Here's an example of how you might configure the `response_factory` section to u
 
 The `container` section is integral to managing dependencies and services within the Michel Framework Core. To use this section effectively, it's essential to have a PSR-11 compatible container implementation installed, as the framework does not provide a default PSR-11 container.
 
-For example, you can configure the `container` section to use the `\DevCoder\DependencyInjection\Container` provided by the DevCoder library for dependency injection. Here's an example of how you might set it up:
+For example, you can configure the `container` section to use the `\PhpDevCommunity\DependencyInjection\Container` provided by the DevCoder library for dependency injection. Here's an example of how you might set it up:
 
 ```php
 'container' => static function (array $definitions, array $options): ContainerInterface {
-    // Instantiate a PSR-11 compatible container using \DevCoder\DependencyInjection\Container or your preferred library.
-    return new \DevCoder\DependencyInjection\Container($definitions, new \DevCoder\DependencyInjection\ReflectionResolver());
+    // Instantiate a PSR-11 compatible container using \PhpDevCommunity\DependencyInjection\Container or your preferred library.
+    return new \PhpDevCommunity\DependencyInjection\Container($definitions, new \PhpDevCommunity\DependencyInjection\ReflectionResolver());
 },
 ```
 

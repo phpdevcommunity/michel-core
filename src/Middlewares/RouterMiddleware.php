@@ -14,7 +14,7 @@ use PhpDevCommunity\Michel\Core\Http\Exception\MethodNotAllowedException;
 use PhpDevCommunity\Michel\Core\Http\Exception\NotFoundException;
 use PhpDevCommunity\Michel\Core\Middlewares\Router\AuraRouterMiddleware;
 use PhpDevCommunity\Michel\Core\Middlewares\Router\SymfonyRouterMiddleware;
-use DevCoder\Router;
+use PhpDevCommunity\Router;
 use Aura\Router\RouterContainer;
 use Symfony\Component\Routing\RouteCollection;
 use function array_values;
@@ -49,7 +49,7 @@ final class RouterMiddleware implements MiddlewareInterface
 
         $response = null;
         if (is_a($this->router, Router::class)) {
-            $response = (new \DevCoder\RouterMiddleware($this->router, $this->responseFactory))
+            $response = (new \PhpDevCommunity\RouterMiddleware($this->router, $this->responseFactory))
                 ->process($request, $handler);
         } elseif (is_a($this->router, RouterContainer::class)) {
             $response = (new AuraRouterMiddleware($this->router, $this->responseFactory))

@@ -1,7 +1,7 @@
 <?php
 namespace PhpDevCommunity\Michel\Core\Router\Bridge;
 
-use DevCoder\Route as DevCoderRoute;
+use PhpDevCommunity\Route as DevCoderRoute;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Aura\Router\Route as AuraRoute;
 use PhpDevCommunity\Michel\Core\Router\Route;

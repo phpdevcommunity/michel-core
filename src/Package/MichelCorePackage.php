@@ -2,11 +2,11 @@
 
 namespace PhpDevCommunity\Michel\Core\Package;
 
-use DevCoder\Listener\EventDispatcher;
-use DevCoder\Listener\ListenerProvider;
-use DevCoder\Renderer\PhpRenderer;
-use DevCoder\Route;
-use DevCoder\Router as DevCoderRouter;
+use PhpDevCommunity\Listener\EventDispatcher;
+use PhpDevCommunity\Listener\ListenerProvider;
+use PhpDevCommunity\Renderer\PhpRenderer;
+use PhpDevCommunity\Route;
+use PhpDevCommunity\Router as PhpDevCommunityRouter;
 use PhpDevCommunity\Michel\Core\Command\CacheClearCommand;
 use PhpDevCommunity\Michel\Core\Command\DebugContainerCommand;
 use PhpDevCommunity\Michel\Core\Command\DebugEnvCommand;
@@ -76,7 +76,7 @@ final class MichelCorePackage implements PackageInterface
                 },
                 'router' => static function (ContainerInterface $container): object {
 
-                    if (!class_exists(DevCoderRouter::class)) {
+                    if (!class_exists(PhpDevCommunityRouter::class)) {
                         throw new LogicException('The Router component requires the presence of a router library. You can install it by running "composer require phpdevcommunity/php-router".');
                     }
 
@@ -86,7 +86,7 @@ final class MichelCorePackage implements PackageInterface
                     $routes = $container->get('michel.routes');
                     $factory = new RouteFactory();
 
-                    $router = new DevCoderRouter([], $container->get('app.url'));
+                    $router = new PhpDevCommunityRouter([], $container->get('app.url'));
                     foreach ($routes as $route) {
                         $router->add($factory->createDevCoderRoute($route));
                     }
