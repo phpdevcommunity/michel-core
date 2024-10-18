@@ -51,6 +51,19 @@ final class RouterMiddleware implements MiddlewareInterface
         if (is_a($this->router, Router::class)) {
             $response = (new \PhpDevCommunity\RouterMiddleware($this->router, $this->responseFactory))
                 ->process($request, $handler);
+            $route = $request->getAttribute(\PhpDevCommunity\RouterMiddleware::ATTRIBUTE_KEY, null);
+            if ($route instanceof \PhpDevCommunity\Route) {
+                $controller = $route->getHandler();
+                $attributes = \array_merge([
+                    ControllerMiddleware::CONTROLLER => $controller[0],
+                    ControllerMiddleware::ACTION => $controller[1] ?? null,
+                    ControllerMiddleware::NAME => $route->getName(),
+                ], $route->getAttributes());
+                foreach ($attributes as $key => $value) {
+                    $request = $request->withAttribute($key, $value);
+                }
+            }
+
         } elseif (is_a($this->router, RouterContainer::class)) {
             $response = (new AuraRouterMiddleware($this->router, $this->responseFactory))
                 ->process($request, $handler);

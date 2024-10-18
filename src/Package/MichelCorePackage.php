@@ -33,7 +33,7 @@ final class MichelCorePackage implements PackageInterface
                 EventDispatcherInterface::class => static function (ContainerInterface $container): ?EventDispatcherInterface {
 
                     if (!class_exists(EventDispatcher::class)) {
-                        throw new LogicException('The "EventDispatcherInterface" requires the presence of an event dispatcher. You can install it by running "composer require phpdevcommunity/php-event-dispatcher".');
+                        throw new LogicException('The "EventDispatcherInterface" requires the presence of an event dispatcher. You can install it by running "composer require phpdevcommunity/psr14-event-dispatcher".');
                     }
 
                     $events = $container->get('michel.listeners');
@@ -72,7 +72,7 @@ final class MichelCorePackage implements PackageInterface
                         return new PhpRenderer($container->get('app.template_dir'));
                     }
 
-                    throw new LogicException('The "render" requires a Renderer to be available. You can choose between installing "phpdevcommunity/php-renderer" or "twig/twig" depending on your preference.');
+                    throw new LogicException('The "render" requires a Renderer to be available. You can choose between installing "phpdevcommunity/template-bridge" or "twig/twig" depending on your preference.');
                 },
                 'router' => static function (ContainerInterface $container): object {
 
