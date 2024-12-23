@@ -3,33 +3,46 @@ declare(strict_types=1);
 
 namespace PhpDevCommunity\Michel\Core\Command;
 
+use PhpDevCommunity\Console\Command\CommandInterface;
+use PhpDevCommunity\Console\InputInterface;
+use PhpDevCommunity\Console\Output\ConsoleOutput;
+use PhpDevCommunity\Console\OutputInterface;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
-class DebugContainerCommand extends Command
+final class DebugContainerCommand implements CommandInterface
 {
-    protected static $defaultName = 'debug:container';
     private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        parent::__construct();
     }
 
-    protected function configure()
+    public function getName(): string
     {
-        $this->setDescription('List all service IDs registered in the container');
+        return 'debug:container';
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function getDescription(): string
     {
-        $io = new SymfonyStyle($input, $output);
+        return 'List all service IDs registered in the container';
+    }
 
-        $io->section('Registered Service IDs');
+    public function getOptions(): array
+    {
+        return [];
+    }
+
+    public function getArguments(): array
+    {
+        return [];
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output): void
+    {
+        $io = new ConsoleOutput($output);
+
+        $io->boxed('Registered Service IDs');
 
         $serviceIds = $this->container->get('michel.services_ids');
         natcasesort($serviceIds);
@@ -45,7 +58,6 @@ class DebugContainerCommand extends Command
             }, $serviceIds)
         );
 
-        return Command::SUCCESS;
     }
 
     private function variableToString($variable): string

@@ -3,32 +3,44 @@ declare(strict_types=1);
 
 namespace PhpDevCommunity\Michel\Core\Command;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use PhpDevCommunity\Console\Argument\CommandArgument;
+use PhpDevCommunity\Console\Command\CommandInterface;
+use PhpDevCommunity\Console\InputInterface;
+use PhpDevCommunity\Console\Output\ConsoleOutput;
+use PhpDevCommunity\Console\OutputInterface;
 
-class MakeCommandCommand extends AbstractMakeCommand
+final class MakeCommandCommand extends AbstractMakeCommand implements CommandInterface
 {
-    protected static $defaultName = 'make:command';
 
-    protected function configure()
+    public function getName(): string
     {
-        $this
-            ->setDescription('Generate a new command')
-            ->addArgument('name', InputArgument::REQUIRED, 'The name of the command, ex : App\\Command\\CreateUserCommand');
+        return 'make:command';
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function getDescription(): string
     {
-        $io = new SymfonyStyle($input, $output);
-        $commandName = $input->getArgument('name');
+        return 'Generate a new command';
+    }
+
+    public function getOptions(): array
+    {
+        return [];
+    }
+
+    public function getArguments(): array
+    {
+       return [
+           new CommandArgument("name", true, null, "The name of the command, ex : App\\Command\\CreateUserCommand")
+       ];
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output): void
+    {
+        $io = new ConsoleOutput($output);
+        $commandName = $input->getArgumentValue('name');
 
         $filename = $this->createClass($commandName);
         $io->success("Class $commandName created successfully at $filename.");
-        return Command::SUCCESS;
-
     }
 
     protected function template(string $classNamespace, string $curtClassName): string
@@ -38,29 +50,42 @@ class MakeCommandCommand extends AbstractMakeCommand
 
 namespace $classNamespace;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use PhpDevCommunity\Console\Command\CommandInterface;
+use PhpDevCommunity\Console\InputInterface;
+use PhpDevCommunity\Console\Output\ConsoleOutput;
+use PhpDevCommunity\Console\OutputInterface;
 
-final class $curtClassName extends Command
+final class $curtClassName implements CommandInterface
 {
 
-    protected static \$defaultName = 'my:command';
-    
-    protected function configure()
+    public function getName(): string
     {
-        \$this->setDescription('Description of my command');
+        return 'my:command';
+    }
+
+    public function getDescription(): string
+    {
+        return 'Description of my command';
+    }
+
+    public function getOptions(): array
+    {
+        return [];
+    }
+
+    public function getArguments(): array
+    {
+       return [];
     }
     
-    protected function execute(InputInterface \$input, OutputInterface \$output)
+    public function execute(InputInterface \$input, OutputInterface \$output): void
     {
-        \$io = new SymfonyStyle(\$input, \$output);
+        \$io = new ConsoleOutput(\$output);
         \$io->success("successfully message");
-        return Command::SUCCESS;
     }
 }
 PHP;
 
     }
+
 }

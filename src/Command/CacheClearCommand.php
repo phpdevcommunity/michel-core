@@ -3,38 +3,51 @@ declare(strict_types=1);
 
 namespace PhpDevCommunity\Michel\Core\Command;
 
+use PhpDevCommunity\Console\Command\CommandInterface;
+use PhpDevCommunity\Console\InputInterface;
+use PhpDevCommunity\Console\Output\ConsoleOutput;
+use PhpDevCommunity\Console\OutputInterface;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
-class CacheClearCommand extends Command
+final class CacheClearCommand implements CommandInterface
 {
-    protected static $defaultName = 'cache:clear';
     private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
-        parent::__construct(null);
         $this->container = $container;
     }
 
-    protected function configure()
+    public function getName(): string
     {
-        $this->setDescription('Clear the cache');
+        return 'cache:clear';
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function getDescription(): string
     {
-        $io = new SymfonyStyle($input, $output);
+        return 'Clear the cache';
+    }
+
+    public function getOptions(): array
+    {
+        return [];
+    }
+
+    public function getArguments(): array
+    {
+        return [];
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output): void
+    {
+        $io = new ConsoleOutput($output);
 
         $realCacheDir = $this->container->get('michel.cache_dir');
         if (!is_writable($realCacheDir)) {
             throw new \RuntimeException(sprintf('Unable to write in the "%s" directory.', $realCacheDir));
         }
 
-        $io->comment('Clearing the cache : ' . $realCacheDir);
+        $io->title('Clearing the cache : ' . $realCacheDir);
 
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($realCacheDir, \FilesystemIterator::SKIP_DOTS),
@@ -59,7 +72,5 @@ class CacheClearCommand extends Command
         }
 
         $io->success('Cache was successfully cleared.');
-
-        return Command::SUCCESS;
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Test\PhpDevCommunity\Michel\Core;
 
+use PhpDevCommunity\Console\CommandRunner;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ExceptionHandler;
 use PhpDevCommunity\Michel\Core\Middlewares\RouterMiddleware;
 use PhpDevCommunity\Michel\Core\Package\MichelCorePackage;
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Console\Application;
 
 class MichelCorePackageTest extends TestCase
 {
@@ -27,8 +27,8 @@ class MichelCorePackageTest extends TestCase
         $this->assertArrayHasKey('render', $definitions);
         $this->assertTrue(is_callable($definitions['render']));
 
-        $this->assertArrayHasKey(Application::class, $definitions);
-        $this->assertTrue(is_callable($definitions[Application::class]));
+        $this->assertArrayHasKey(CommandRunner::class, $definitions);
+        $this->assertTrue(is_callable($definitions[CommandRunner::class]));
 
         $this->assertArrayHasKey(RouterMiddleware::class, $definitions);
         $this->assertTrue(is_callable($definitions[RouterMiddleware::class]));

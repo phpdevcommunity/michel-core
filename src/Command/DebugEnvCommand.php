@@ -3,25 +3,38 @@ declare(strict_types=1);
 
 namespace PhpDevCommunity\Michel\Core\Command;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use PhpDevCommunity\Console\Command\CommandInterface;
+use PhpDevCommunity\Console\InputInterface;
+use PhpDevCommunity\Console\Output\ConsoleOutput;
+use PhpDevCommunity\Console\OutputInterface;
 
-class DebugEnvCommand extends Command
+final class DebugEnvCommand implements CommandInterface
 {
-    protected static $defaultName = 'debug:env';
-
-    protected function configure()
+    public function getName(): string
     {
-        $this->setDescription('Lists all environment variables along with their corresponding values.');
+        return 'debug:env';
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function getDescription(): string
     {
-        $io = new SymfonyStyle($input, $output);
+      return 'Lists all environment variables along with their corresponding values.';
+    }
 
-        $io->section('Env Variables');
+    public function getOptions(): array
+    {
+        return [];
+    }
+
+    public function getArguments(): array
+    {
+        return [];
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output): void
+    {
+        $io = new ConsoleOutput($output);
+
+        $io->boxed('Env Variables');
 
         $values = [];
         foreach ($_ENV as $key => $value) {
@@ -32,7 +45,7 @@ class DebugEnvCommand extends Command
             $values
         );
 
-        $io->comment('Please note that actual values may vary between web and command-line interfaces.');
-        return Command::SUCCESS;
+        $io->writeln('Please note that actual values may vary between web and command-line interfaces.');
     }
+
 }

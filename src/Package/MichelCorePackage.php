@@ -2,6 +2,7 @@
 
 namespace PhpDevCommunity\Michel\Core\Package;
 
+use PhpDevCommunity\Console\CommandRunner;
 use PhpDevCommunity\Listener\EventDispatcher;
 use PhpDevCommunity\Listener\ListenerProvider;
 use PhpDevCommunity\Renderer\PhpRenderer;
@@ -20,7 +21,6 @@ use PhpDevCommunity\Michel\Core\Router\Bridge\RouteFactory;
 use LogicException;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Console\Application;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use function getenv;
@@ -31,11 +31,6 @@ final class MichelCorePackage implements PackageInterface
     {
         return [
                 EventDispatcherInterface::class => static function (ContainerInterface $container): ?EventDispatcherInterface {
-
-                    if (!class_exists(EventDispatcher::class)) {
-                        throw new LogicException('The "EventDispatcherInterface" requires the presence of an event dispatcher. You can install it by running "composer require phpdevcommunity/psr14-event-dispatcher".');
-                    }
-
                     $events = $container->get('michel.listeners');
                     $provider = new ListenerProvider();
                     foreach ($events as $event => $listeners) {
@@ -51,15 +46,13 @@ final class MichelCorePackage implements PackageInterface
                     }
                     return new EventDispatcher($provider);
                 },
-                Application::class => static function (ContainerInterface $container): Application {
+                CommandRunner::class => static function (ContainerInterface $container): CommandRunner {
                     $commandList = $container->get('michel.commands');
                     $commands = [];
                     foreach ($commandList as $commandName) {
                         $commands[] = $container->get($commandName);
                     }
-                    $application = new Application();
-                    $application->addCommands($commands);
-                    return $application;
+                    return new CommandRunner($commands);
                 },
                 'render' => static function (ContainerInterface $container) {
                     if (class_exists(Environment::class)) {

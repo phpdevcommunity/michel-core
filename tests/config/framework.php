@@ -12,32 +12,32 @@ return [
     'server_request' => static function (): ServerRequestInterface {
         return new class implements ServerRequestInterface {
 
-            public function getProtocolVersion()
+            public function getProtocolVersion(): string
             {
                 // TODO: Implement getProtocolVersion() method.
             }
 
-            public function withProtocolVersion(string $version)
+            public function withProtocolVersion(string $version): \Psr\Http\Message\MessageInterface
             {
                 // TODO: Implement withProtocolVersion() method.
             }
 
-            public function getHeaders()
+            public function getHeaders(): array
             {
-                // TODO: Implement getHeaders() method.
+                return [];
             }
 
-            public function hasHeader(string $name)
+            public function hasHeader(string $name): bool
             {
                 // TODO: Implement hasHeader() method.
             }
 
-            public function getHeader(string $name)
+            public function getHeader(string $name): array
             {
                 // TODO: Implement getHeader() method.
             }
 
-            public function getHeaderLine(string $name)
+            public function getHeaderLine(string $name): string
             {
                 // TODO: Implement getHeaderLine() method.
             }
@@ -47,42 +47,42 @@ return [
                 // TODO: Implement withHeader() method.
             }
 
-            public function withAddedHeader(string $name, $value)
+            public function withAddedHeader(string $name, $value): \Psr\Http\Message\MessageInterface
             {
                 // TODO: Implement withAddedHeader() method.
             }
 
-            public function withoutHeader(string $name)
+            public function withoutHeader(string $name): \Psr\Http\Message\MessageInterface
             {
                 // TODO: Implement withoutHeader() method.
             }
 
-            public function getBody()
+            public function getBody(): StreamInterface
             {
                 // TODO: Implement getBody() method.
             }
 
-            public function withBody(StreamInterface $body)
+            public function withBody(StreamInterface $body): \Psr\Http\Message\MessageInterface
             {
                 // TODO: Implement withBody() method.
             }
 
-            public function getRequestTarget()
+            public function getRequestTarget(): string
             {
                 // TODO: Implement getRequestTarget() method.
             }
 
-            public function withRequestTarget(string $requestTarget)
+            public function withRequestTarget(string $requestTarget): \Psr\Http\Message\RequestInterface
             {
                 // TODO: Implement withRequestTarget() method.
             }
 
-            public function getMethod()
+            public function getMethod(): string
             {
                 // TODO: Implement getMethod() method.
             }
 
-            public function withMethod(string $method)
+            public function withMethod(string $method): \Psr\Http\Message\RequestInterface
             {
                 // TODO: Implement withMethod() method.
             }
@@ -92,42 +92,42 @@ return [
                 // TODO: Implement getUri() method.
             }
 
-            public function withUri(UriInterface $uri, bool $preserveHost = false)
+            public function withUri(UriInterface $uri, bool $preserveHost = false): \Psr\Http\Message\RequestInterface
             {
                 // TODO: Implement withUri() method.
             }
 
-            public function getServerParams()
+            public function getServerParams(): array
             {
                 // TODO: Implement getServerParams() method.
             }
 
-            public function getCookieParams()
+            public function getCookieParams(): array
             {
                 // TODO: Implement getCookieParams() method.
             }
 
-            public function withCookieParams(array $cookies)
+            public function withCookieParams(array $cookies): ServerRequestInterface
             {
                 // TODO: Implement withCookieParams() method.
             }
 
-            public function getQueryParams()
+            public function getQueryParams(): array
             {
                 // TODO: Implement getQueryParams() method.
             }
 
-            public function withQueryParams(array $query)
+            public function withQueryParams(array $query): ServerRequestInterface
             {
                 // TODO: Implement withQueryParams() method.
             }
 
-            public function getUploadedFiles()
+            public function getUploadedFiles(): array
             {
                 // TODO: Implement getUploadedFiles() method.
             }
 
-            public function withUploadedFiles(array $uploadedFiles)
+            public function withUploadedFiles(array $uploadedFiles): ServerRequestInterface
             {
                 // TODO: Implement withUploadedFiles() method.
             }
@@ -137,7 +137,7 @@ return [
                 // TODO: Implement getParsedBody() method.
             }
 
-            public function withParsedBody($data)
+            public function withParsedBody($data): ServerRequestInterface
             {
                 // TODO: Implement withParsedBody() method.
             }
@@ -157,12 +157,12 @@ return [
                 // TODO: Implement getAttribute() method.
             }
 
-            public function withAttribute(string $name, $value)
+            public function withAttribute(string $name, $value): ServerRequestInterface
             {
                 // TODO: Implement withAttribute() method.
             }
 
-            public function withoutAttribute(string $name)
+            public function withoutAttribute(string $name): ServerRequestInterface
             {
                 // TODO: Implement withoutAttribute() method.
             }
@@ -196,7 +196,7 @@ return [
                 return $this->definitions[$id] ?? null;
             }
 
-            public function has(string $id)
+            public function has(string $id): bool
             {
                 return array_key_exists($id, $this->definitions);
             }

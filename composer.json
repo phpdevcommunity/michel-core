@@ -34,7 +34,8 @@
         "psr/log": "^1.1|^2.0",
         "phpdevcommunity/php-dotenv": "^3.0",
         "phpdevcommunity/php-options-resolver": "^1.0",
-        "symfony/console": "^5.4"
+        "phpdevcommunity/php-console": "^1.0",
+        "phpdevcommunity/psr14-event-dispatcher": "^1.0"
     },
     "minimum-stability": "alpha",
     "require-dev": {

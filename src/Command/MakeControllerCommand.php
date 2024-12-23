@@ -3,31 +3,44 @@ declare(strict_types=1);
 
 namespace PhpDevCommunity\Michel\Core\Command;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use PhpDevCommunity\Console\Argument\CommandArgument;
+use PhpDevCommunity\Console\Command\CommandInterface;
+use PhpDevCommunity\Console\InputInterface;
+use PhpDevCommunity\Console\Output\ConsoleOutput;
+use PhpDevCommunity\Console\OutputInterface;
 
-class MakeControllerCommand extends AbstractMakeCommand
+final class MakeControllerCommand extends AbstractMakeCommand implements CommandInterface
 {
-    protected static $defaultName = 'make:controller';
 
-    protected function configure()
+    public function getName(): string
     {
-        $this
-            ->setDescription('Generate a new controller')
-            ->addArgument('name', InputArgument::REQUIRED, 'The name of the controller, ex : App\\Controller\\MainController');
+        return 'make:controller';
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function getDescription(): string
     {
-        $io = new SymfonyStyle($input, $output);
-        $controllerName = $input->getArgument('name');
+        return 'Generate a new controller';
+    }
+
+    public function getOptions(): array
+    {
+        return [];
+    }
+
+    public function getArguments(): array
+    {
+        return [
+            new CommandArgument("name", true, null, "The name of the controller, ex : App\\Controller\\MainController")
+        ];
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output): void
+    {
+        $io = new ConsoleOutput($output);
+        $controllerName = $input->getArgumentValue('name');
 
         $filename = $this->createClass($controllerName);
         $io->success("Class $controllerName created successfully at $filename.");
-        return Command::SUCCESS;
 
     }
 
@@ -51,4 +64,5 @@ final class $curtClassName extends Controller
 }
 PHP;
     }
+
 }

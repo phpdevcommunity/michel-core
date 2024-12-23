@@ -4,9 +4,8 @@ declare(strict_types=1);
 namespace PhpDevCommunity\Michel\Core\Command;
 
 use RuntimeException;
-use Symfony\Component\Console\Command\Command;
 
-abstract class AbstractMakeCommand extends Command
+abstract class AbstractMakeCommand
 {
     abstract protected function template(string $classNamespace, string $curtClassName): string;
 
@@ -34,7 +33,7 @@ abstract class AbstractMakeCommand extends Command
             foreach ($paths as $path) {
                 if (strpos($controllerName, $namespace) === 0) {
                     $path = realpath($path);
-                    return filepath_join( $path, str_replace('\\', DIR_SEP, substr($controllerName, strlen($namespace))) . '.php');
+                    return filepath_join( $path, str_replace('\\', DIRECTORY_SEPARATOR, substr($controllerName, strlen($namespace))) . '.php');
                 }
             }
         }

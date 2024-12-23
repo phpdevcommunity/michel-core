@@ -3,34 +3,47 @@ declare(strict_types=1);
 
 namespace PhpDevCommunity\Michel\Core\Command;
 
+use PhpDevCommunity\Console\Command\CommandInterface;
+use PhpDevCommunity\Console\InputInterface;
+use PhpDevCommunity\Console\Output\ConsoleOutput;
+use PhpDevCommunity\Console\OutputInterface;
 use PhpDevCommunity\Michel\Core\Router\Route;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
-class DebugRouteCommand extends Command
+final class DebugRouteCommand implements CommandInterface
 {
-    protected static $defaultName = 'debug:routes';
     private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        parent::__construct();
     }
 
-    protected function configure()
+    public function getName(): string
     {
-        $this->setDescription('List all registered routes in the application');
+        return 'debug:routes';
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function getDescription(): string
     {
-        $io = new SymfonyStyle($input, $output);
+        return 'List all registered routes in the application';
+    }
 
-        $io->section('Registered Routes');
+    public function getOptions(): array
+    {
+        return [];
+    }
+
+    public function getArguments(): array
+    {
+        return [];
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output): void
+    {
+        $io = new ConsoleOutput($output);
+
+        $io->title('Registered Routes');
 
         /**
          * @var array<Route> $routes
@@ -52,7 +65,5 @@ class DebugRouteCommand extends Command
             ['Name', 'Method', 'Path'],
             $formattedRoutes
         );
-
-        return Command::SUCCESS;
     }
 }
