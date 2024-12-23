@@ -65,5 +65,6 @@ final class DebugRouteCommand implements CommandInterface
             ['Name', 'Method', 'Path'],
             $formattedRoutes
         );
+        $io->writeln('');
     }
 }

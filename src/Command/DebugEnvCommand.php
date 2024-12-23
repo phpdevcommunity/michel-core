@@ -45,7 +45,9 @@ final class DebugEnvCommand implements CommandInterface
             $values
         );
 
+        $io->writeln('');
         $io->writeln('Please note that actual values may vary between web and command-line interfaces.');
+        $io->writeln('');
     }
 
 }

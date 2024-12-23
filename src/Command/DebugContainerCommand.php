@@ -52,11 +52,17 @@ final class DebugContainerCommand implements CommandInterface
             array_map(function ($serviceId) {
                 $value = null;
                 if ($this->container->has($serviceId)) {
-                    $value = $this->variableToString($this->container->get($serviceId));
+                    try {
+                        $value = $this->variableToString($this->container->get($serviceId));
+                    } catch (\Throwable $e) {
+                        $value = $e->getMessage();
+                    }
                 }
                 return [$serviceId, $value];
             }, $serviceIds)
         );
+
+        $io->writeln('');
 
     }
 
