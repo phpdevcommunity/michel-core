@@ -6,6 +6,8 @@ namespace PhpDevCommunity\Michel\Core\Middlewares;
 
 use BadMethodCallException;
 use LogicException;
+use PhpDevCommunity\Route;
+use PhpDevCommunity\RouterMiddleware;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,9 +27,6 @@ use function sprintf;
  */
 final class ControllerMiddleware implements MiddlewareInterface
 {
-    public const CONTROLLER = '_controller';
-    public const ACTION = '_action';
-    public const NAME = '_name';
 
     private ContainerInterface $container;
 
@@ -60,8 +59,14 @@ final class ControllerMiddleware implements MiddlewareInterface
 
     private function resolveController(ServerRequestInterface $request): callable
     {
-        $controller = $request->getAttribute(self::CONTROLLER);
-        $action = $request->getAttribute(self::ACTION);
+        $route = $request->getAttribute(RouterMiddleware::ATTRIBUTE_KEY);
+        if (!$route instanceof Route) {
+            throw new LogicException('Route not found in request., Maybe you forgot to use PhpDevCommunity\RouterMiddleware?');
+        }
+
+        $handler = $route->getHandler();
+        $controller = $handler[0];
+        $action = $handler[1];
 
         if (is_string($controller)) {
             $controller = $this->container->get($controller);
@@ -84,10 +89,7 @@ final class ControllerMiddleware implements MiddlewareInterface
     private static function getArguments(ServerRequestInterface $request): array
     {
         $attributes = $request->getAttributes();
-        unset($attributes[self::CONTROLLER]);
-        unset($attributes[self::ACTION]);
-        unset($attributes[self::NAME]);
-
+        unset($attributes[RouterMiddleware::ATTRIBUTE_KEY]);
         return array_values($attributes);
     }
 
