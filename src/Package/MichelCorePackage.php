@@ -6,8 +6,6 @@ use PhpDevCommunity\Console\CommandRunner;
 use PhpDevCommunity\Listener\EventDispatcher;
 use PhpDevCommunity\Listener\ListenerProvider;
 use PhpDevCommunity\Renderer\PhpRenderer;
-use PhpDevCommunity\Route;
-use PhpDevCommunity\Router as PhpDevCommunityRouter;
 use PhpDevCommunity\Michel\Core\Command\CacheClearCommand;
 use PhpDevCommunity\Michel\Core\Command\DebugContainerCommand;
 use PhpDevCommunity\Michel\Core\Command\DebugEnvCommand;
@@ -16,9 +14,11 @@ use PhpDevCommunity\Michel\Core\Command\MakeCommandCommand;
 use PhpDevCommunity\Michel\Core\Command\MakeControllerCommand;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ExceptionHandler;
-use PhpDevCommunity\Michel\Core\Middlewares\RouterMiddleware;
-use PhpDevCommunity\Michel\Core\Router\Bridge\RouteFactory;
 use LogicException;
+use PhpDevCommunity\Route;
+use PhpDevCommunity\Router;
+use PhpDevCommunity\RouterInterface;
+use PhpDevCommunity\RouterMiddleware;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment;
@@ -67,26 +67,15 @@ final class MichelCorePackage implements PackageInterface
 
                     throw new LogicException('The "render" requires a Renderer to be available. You can choose between installing "phpdevcommunity/template-bridge" or "twig/twig" depending on your preference.');
                 },
-                'router' => static function (ContainerInterface $container): object {
-
-                    if (!class_exists(PhpDevCommunityRouter::class)) {
-                        throw new LogicException('The Router component requires the presence of a router library. You can install it by running "composer require phpdevcommunity/php-router".');
-                    }
-
+                RouterInterface::class => static function (ContainerInterface $container): object {
                     /**
-                     * @var array<\PhpDevCommunity\Michel\Core\Router\Route> $routes
+                     * @var array<Route> $routes
                      */
                     $routes = $container->get('michel.routes');
-                    $factory = new RouteFactory();
-
-                    $router = new PhpDevCommunityRouter([], $container->get('app.url'));
-                    foreach ($routes as $route) {
-                        $router->add($factory->createDevCoderRoute($route));
-                    }
-                    return $router;
+                    return new Router($routes, $container->get('app.url'));
                 },
                 RouterMiddleware::class => static function (ContainerInterface $container) {
-                    return new RouterMiddleware($container->get('router'), response_factory());
+                    return new RouterMiddleware($container->get(RouterInterface::class), response_factory());
                 },
                 ExceptionHandler::class => static function (ContainerInterface $container) {
                     return new ExceptionHandler(response_factory(), [

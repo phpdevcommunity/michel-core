@@ -5,7 +5,8 @@ namespace Test\PhpDevCommunity\Michel\Core\Package;
 use PhpDevCommunity\Michel\Core\Command\CacheClearCommand;
 use PhpDevCommunity\Michel\Core\Command\MakeCommandCommand;
 use PhpDevCommunity\Michel\Core\Package\PackageInterface;
-use PhpDevCommunity\Michel\Core\Router\Route;
+use PhpDevCommunity\Route;
+use PhpDevCommunity\RouterInterface;
 use Psr\Container\ContainerInterface;
 
 class MyPackageTest implements PackageInterface
@@ -13,7 +14,7 @@ class MyPackageTest implements PackageInterface
     public function getDefinitions(): array
     {
         return [
-            'router' => static function (ContainerInterface $container) {
+            RouterInterface::class => static function (ContainerInterface $container) {
                 return new \stdClass();
             },
             'render' => static function (ContainerInterface $container) {

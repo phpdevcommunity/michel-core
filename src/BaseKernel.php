@@ -47,7 +47,9 @@ abstract class BaseKernel
      * @var array<MiddlewareInterface, string>
      */
     private array $middlewareCollection = [];
-    protected ?float $startTime = null;
+
+    protected array $debug = [];
+
 
     /**
      * BaseKernel constructor.
@@ -66,21 +68,41 @@ abstract class BaseKernel
     final public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
+            $request = $request->withAttribute('request_id', strtoupper(uniqid('REQ')));
             $requestHandler = new RequestHandler($this->container, $this->middlewareCollection);
             $response = $requestHandler->handle($request);
-            if ($this->startTime !== null) {
-                $diff = (microtime(true) - $this->startTime);
+            if (!empty($this->debug)) {
+                $startTime = $this->debug['start_time'];
+                unset($this->debug['start_time']);
+                $diff = (microtime(true) - $startTime);
                 $this->log([
-                    'request' => $request->getUri()->getPath(),
-                    'load_time_ms' => $diff * 1000 . ' ms',
-                    'load_time_second' => number_format($diff, 3) . ' s',
-                    'environment' => $this->getEnv(),
-                ]);
+                        '@timestamp' => (new DateTimeImmutable())->format('c'),
+                        'log.level' => 'debug',
+                        'id' => $request->getAttribute('request_id'),
+                        'event.duration' => $diff,
+                        'metrics' => [
+                            'memory.usage' => _m_convert(memory_get_usage(true)),
+                            'load_time.ms' => $diff * 1000,
+                            'load_time.s' => number_format($diff, 3),
+                        ],
+                        'http.request' => [
+                            'method' => $request->getMethod(),
+                            'url' => $request->getUri()->__toString(),
+                            'path' => $request->getUri()->getPath(),
+                            'body' => $request->getBody()->getContents(),
+                            'headers' => $request->getHeaders(),
+                            'query' => $request->getQueryParams(),
+                            'post' => $request->getParsedBody(),
+                            'cookies' => $request->getCookieParams(),
+                            'protocol' => $request->getProtocolVersion(),
+                            'server' => $request->getServerParams(),
+                        ]
+                    ] + $this->debug, 'debug.log');
             }
             return $response;
         } catch (Throwable $exception) {
             if (!$exception instanceof HttpExceptionInterface) {
-                $this->logException($exception);
+                $this->logException($exception, $request->getAttribute('request_id'));
             }
 
             $exceptionHandler = $this->container->get(ExceptionHandler::class);
@@ -117,20 +139,26 @@ abstract class BaseKernel
         return App::createContainer($definitions, ['cache_dir' => $this->getCacheDir()]);
     }
 
-    final protected function logException(Throwable $exception): void
+    final protected function logException(Throwable $exception, string $id = null): void
     {
         $this->log([
-            'date' => (new DateTimeImmutable())->format('c'),
-            'id' => mb_strtoupper(uniqid('ERR')),
+            '@timestamp' => (new DateTimeImmutable())->format('c'),
+            'log.level' => 'error',
+            'id' => $id,
             'message' => $exception->getMessage(),
-            'code' => $exception->getCode(),
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
-            'trace' => $exception->getTrace(),
+            'error' => [
+                'code' => $exception->getCode(),
+                'stack_trace' => $exception->getTrace(),
+                'class' => get_class($exception),
+            ],
+            'source' => [
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+            ],
         ]);
     }
 
-    final protected function log(array $data): void
+    final protected function log(array $data, string $logFile = null): void
     {
         $logDir = $this->getLogDir();
         if (empty($logDir)) {
@@ -140,11 +168,13 @@ abstract class BaseKernel
         if (!is_dir($logDir)) {
             @mkdir($logDir, 0777, true);
         }
-
+        if ($logFile === null) {
+            $logFile = $this->getEnv() . '.log';
+        }
         error_log(
             json_encode($data, JSON_UNESCAPED_SLASHES) . PHP_EOL,
             3,
-            filepath_join( $logDir, $this->getEnv() . '.log')
+            filepath_join( $logDir, $logFile)
         );
     }
 
@@ -152,11 +182,13 @@ abstract class BaseKernel
     {
         $this->initEnv();
 
+        ini_set("error_log", $this->getLogDir().'/error_log.log');
         date_default_timezone_set(getenv('APP_TIMEZONE'));
 
         error_reporting(0);
         if ($this->getEnv() === 'dev') {
-            $this->startTime = microtime(true);
+            $this->debug['start_time'] = microtime(true);
+            $this->debug['environment'] = $this->getEnv();
             ErrorHandler::register();
         }
 
@@ -182,6 +214,7 @@ abstract class BaseKernel
         $definitions['michel.services_ids'] = array_keys($definitions);
 
         $this->container = $this->loadContainer($definitions);
+        unset($services, $parameters, $listeners, $routes, $commands, $packages, $definitions);
         $this->afterBoot();
     }
 

@@ -34,7 +34,7 @@ final class DebugEnvCommand implements CommandInterface
     {
         $io = new ConsoleOutput($output);
 
-        $io->boxed('Env Variables');
+        $io->title('Env Variables');
 
         $values = [];
         foreach ($_ENV as $key => $value) {

@@ -4,8 +4,9 @@ namespace Test\PhpDevCommunity\Michel\Core;
 
 use PhpDevCommunity\Console\CommandRunner;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ExceptionHandler;
-use PhpDevCommunity\Michel\Core\Middlewares\RouterMiddleware;
 use PhpDevCommunity\Michel\Core\Package\MichelCorePackage;
+use PhpDevCommunity\RouterInterface;
+use PhpDevCommunity\RouterMiddleware;
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
@@ -21,8 +22,8 @@ class MichelCorePackageTest extends TestCase
         $this->assertArrayHasKey(EventDispatcherInterface::class, $definitions);
         $this->assertTrue(is_callable($definitions[EventDispatcherInterface::class]));
 
-        $this->assertArrayHasKey('router', $definitions);
-        $this->assertTrue(is_callable($definitions['router']));
+        $this->assertArrayHasKey(RouterInterface::class, $definitions);
+        $this->assertTrue(is_callable($definitions[RouterInterface::class]));
 
         $this->assertArrayHasKey('render', $definitions);
         $this->assertTrue(is_callable($definitions['render']));

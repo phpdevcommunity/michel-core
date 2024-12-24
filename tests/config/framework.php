@@ -134,7 +134,7 @@ return [
 
             public function getParsedBody()
             {
-                // TODO: Implement getParsedBody() method.
+                return [];
             }
 
             public function withParsedBody($data): ServerRequestInterface

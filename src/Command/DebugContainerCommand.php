@@ -42,7 +42,7 @@ final class DebugContainerCommand implements CommandInterface
     {
         $io = new ConsoleOutput($output);
 
-        $io->boxed('Registered Service IDs');
+        $io->title('Registered Service IDs');
 
         $serviceIds = $this->container->get('michel.services_ids');
         natcasesort($serviceIds);
@@ -55,8 +55,9 @@ final class DebugContainerCommand implements CommandInterface
                     try {
                         $value = $this->variableToString($this->container->get($serviceId));
                     } catch (\Throwable $e) {
-                        $value = $e->getMessage();
+                        $value = $this->variableToString($e->getMessage());
                     }
+
                 }
                 return [$serviceId, $value];
             }, $serviceIds)

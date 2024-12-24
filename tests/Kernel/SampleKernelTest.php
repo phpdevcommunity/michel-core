@@ -6,11 +6,11 @@ use PhpDevCommunity\Michel\Core\BaseKernel;
 
 class  SampleKernelTest extends BaseKernel
 {
-    private string $envfile;
+    private string $envFile;
 
-    public function __construct(string $envfile)
+    public function __construct(string $envFile)
     {
-        $this->envfile = $envfile;
+        $this->envFile = $envFile;
         parent::__construct();
     }
 
@@ -41,7 +41,7 @@ class  SampleKernelTest extends BaseKernel
 
     public function getEnvFile(): string
     {
-        return filepath_join( $this->getProjectDir(), $this->envfile);
+        return filepath_join( $this->getProjectDir(), $this->envFile);
     }
 
     protected function afterBoot(): void
