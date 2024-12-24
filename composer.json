@@ -37,7 +37,8 @@
         "phpdevcommunity/php-options-resolver": "^1.0",
         "phpdevcommunity/php-console": "^1.0",
         "phpdevcommunity/psr14-event-dispatcher": "^1.0",
-        "ext-mbstring": "*"
+        "ext-mbstring": "*",
+        "phpdevcommunity/php-session": "^1.0"
     },
     "minimum-stability": "alpha",
     "require-dev": {

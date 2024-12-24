@@ -33,6 +33,14 @@ final class IpRestrictionMiddleware implements MiddlewareInterface
 
     private function isIpAllowed($ip): bool
     {
+        if ($this->allowedIps === []) {
+            return true;
+        }
+        foreach ($this->allowedIps as $allowedIp) {
+            if (preg_match($allowedIp, $ip)) {
+                return true;
+            }
+        }
         return in_array($ip, $this->allowedIps);
     }
 }
