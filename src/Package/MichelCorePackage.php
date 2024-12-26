@@ -110,12 +110,17 @@ final class MichelCorePackage implements PackageInterface
                 );
             },
             ExceptionHandler::class => static function (ContainerInterface $container) {
+                /**
+                 * @var ConfigProvider $configProvider
+                 */
+                $configProvider = $container->get(ConfigProvider::class);
+
                 return new ExceptionHandler(response_factory(), [
                         'debug' => $container->get('michel.debug'),
                         'html_response' => new HtmlErrorRenderer(
                             response_factory(),
                             $container->get('michel.debug'),
-                            filepath_join($container->get('app.template_dir'), '_exception')
+                            filepath_join($configProvider->getTemplateDir(), '_exception')
                         )
                     ]
                 );
@@ -128,7 +133,7 @@ final class MichelCorePackage implements PackageInterface
         return [
             'app.url' => getenv('APP_URL') ?: '', // Application URL
             'app.locale' => getenv('APP_LOCALE') ?: 'en', // Default locale
-            'app.template_dir' => getenv('APP_TEMPLATE_DIR') ?: '', // Template directory
+            'app.template_dir' => getenv('APP_TEMPLATE_DIR') ?: 'templates', // Template directory
             'app.allowed_ips' => getenv('APP_ALLOWED_IPS') ?: '', // Allowed IP addresses
             'app.secret_key' => getenv('APP_SECRET_KEY') ?: '', // Secret
             'app.maintenance' => $_ENV['APP_MAINTENANCE'] ?? false, // Maintenance mode
