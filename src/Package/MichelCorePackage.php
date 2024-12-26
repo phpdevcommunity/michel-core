@@ -10,6 +10,7 @@ use PhpDevCommunity\Michel\Core\Command\CacheClearCommand;
 use PhpDevCommunity\Michel\Core\Command\DebugContainerCommand;
 use PhpDevCommunity\Michel\Core\Command\DebugEnvCommand;
 use PhpDevCommunity\Michel\Core\Command\DebugRouteCommand;
+use PhpDevCommunity\Michel\Core\Command\LogClearCommand;
 use PhpDevCommunity\Michel\Core\Command\MakeCommandCommand;
 use PhpDevCommunity\Michel\Core\Command\MakeControllerCommand;
 use PhpDevCommunity\Michel\Core\Config\ConfigProvider;
@@ -51,6 +52,7 @@ final class MichelCorePackage implements PackageInterface
                         $provider->addListener($event, $container->get($listeners));
                     }
                 }
+                unset($events);
                 return new EventDispatcher($provider);
             },
             CommandRunner::class => static function (ContainerInterface $container): CommandRunner {
@@ -59,6 +61,7 @@ final class MichelCorePackage implements PackageInterface
                 foreach ($commandList as $commandName) {
                     $commands[] = $container->get($commandName);
                 }
+                unset($commandList);
                 return new CommandRunner($commands);
             },
             'render' => static function (ContainerInterface $container) {
@@ -79,7 +82,10 @@ final class MichelCorePackage implements PackageInterface
                  * @var array<Route> $routes
                  */
                 $routes = $container->get('michel.routes');
-                return new Router($routes, $container->get('app.url'));
+                $router =  new Router($routes, $container->get('app.url'));
+                unset($routes);
+
+                return $router;
             },
             RouterMiddleware::class => static function (ContainerInterface $container) {
                 return new RouterMiddleware($container->get(RouterInterface::class), response_factory());
@@ -155,6 +161,7 @@ final class MichelCorePackage implements PackageInterface
     {
         return [
             CacheClearCommand::class,
+            LogClearCommand::class,
             MakeControllerCommand::class,
             MakeCommandCommand::class,
             DebugEnvCommand::class,
