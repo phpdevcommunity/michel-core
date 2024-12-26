@@ -23,8 +23,6 @@ use PhpDevCommunity\Route;
 use PhpDevCommunity\Router;
 use PhpDevCommunity\RouterInterface;
 use PhpDevCommunity\RouterMiddleware;
-use PhpDevCommunity\Session\Storage\NativeSessionStorage;
-use PhpDevCommunity\Session\Storage\SessionStorageInterface;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment;
@@ -39,7 +37,7 @@ final class MichelCorePackage implements PackageInterface
             ConfigProvider::class => static function (ContainerInterface $container): ConfigProvider {
                 return new ConfigProvider($container);
             },
-            EventDispatcherInterface::class => static function (ContainerInterface $container): ?EventDispatcherInterface {
+            EventDispatcherInterface::class => static function (ContainerInterface $container): EventDispatcherInterface {
                 $events = $container->get('michel.listeners');
                 $provider = new ListenerProvider();
                 foreach ($events as $event => $listeners) {
@@ -62,13 +60,6 @@ final class MichelCorePackage implements PackageInterface
                     $commands[] = $container->get($commandName);
                 }
                 return new CommandRunner($commands);
-            },
-            SessionStorageInterface::class => static function (ContainerInterface $container) {
-                /**
-                 * @var ConfigProvider $configProvider
-                 */
-                $configProvider = $container->get(ConfigProvider::class);
-                return new NativeSessionStorage($configProvider->getSessionConfig());
             },
             'render' => static function (ContainerInterface $container) {
                 if (class_exists(Environment::class)) {
@@ -139,19 +130,9 @@ final class MichelCorePackage implements PackageInterface
             'app.locale' => getenv('APP_LOCALE') ?: 'en', // Default locale
             'app.template_dir' => getenv('APP_TEMPLATE_DIR') ?: '', // Template directory
             'app.allowed_ips' => getenv('APP_ALLOWED_IPS') ?: '', // Allowed IP addresses
+            'app.secret_key' => getenv('APP_SECRET_KEY') ?: '', // Secret
             'app.maintenance' => $_ENV['APP_MAINTENANCE'] ?? false, // Maintenance mode
             'app.force_https' => $_ENV['APP_FORCE_HTTPS'] ?? false, // Force HTTPS
-
-            'session.save_path' => getenv('SESSION_SAVE_PATH') ?: 'var/session', // Default path for session storage
-            'session.cookie_lifetime' => $_ENV['SESSION_COOKIE_LIFETIME'] ?: 86400, // Cookie lifetime (24 hours)
-            'session.gc_maxlifetime' => $_ENV['SESSION_GC_MAXLIFETIME'] ?: 604800, // Server-side session lifetime (7 days)
-            'session.cookie_secure' => $_ENV['SESSION_COOKIE_SECURE'] === true, // Cookie is only transmitted via HTTPS
-            'session.cookie_httponly' => $_ENV['SESSION_COOKIE_HTTPONLY'] === true, // Prevents JavaScript access to the cookie
-            'session.use_strict_mode' => $_ENV['SESSION_USE_STRICT_MODE'] === true, // Rejects invalid SIDs
-            'session.use_only_cookies' => $_ENV['SESSION_USE_ONLY_COOKIES'] === true, // Prevents using SIDs in the URL
-            'session.sid_length' => $_ENV['SESSION_SID_LENGTH'] ?? 64, // Secure SID length
-            'session.sid_bits_per_character' => $_ENV['SESSION_SID_BITS_PER_CHARACTER'] ?? 6, // Bits per character (6 for maximum security)
-            'session.cookie_samesite' => $_ENV['SESSION_COOKIE_SAMESITE'] ?? 'Strict', // Protection against CSRF attacks
         ];
     }
 

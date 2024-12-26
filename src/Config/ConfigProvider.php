@@ -8,9 +8,8 @@ final class ConfigProvider
 {
     private ContainerInterface $container;
 
-    public function __construct(ContainerInterface  $container)
+    public function __construct(ContainerInterface $container)
     {
-
         $this->container = $container;
     }
 
@@ -24,9 +23,13 @@ final class ConfigProvider
         if (!is_dir($templateDir)) {
             throw new \LogicException('The "app.template_dir" should be a valid directory');
         }
+
+        if (!str_starts_with($templateDir, '/')) {
+            $templateDir = filepath_join($this->container->get('michel.project_dir'), $templateDir);
+        }
+
         return $templateDir;
     }
-
 
     public function getAllowedIps(): array
     {
@@ -62,27 +65,4 @@ final class ConfigProvider
         }
         return $maintenance;
     }
-
-    public function getSessionConfig(): array
-    {
-        $pathSession = $this->container->get('session.save_path');
-        if (!str_starts_with($pathSession, '/')) {
-            $pathSession = filepath_join($this->container->get('michel.project_dir'), $pathSession);
-        }
-
-        return [
-            'save_path' => $pathSession,
-            'cookie_lifetime' => $this->container->get('session.cookie_lifetime'),
-            'gc_maxlifetime' => $this->container->get('session.gc_maxlifetime'),
-            'cookie_secure' => $this->container->get('session.cookie_secure'),
-            'cookie_httponly' => $this->container->get('session.cookie_httponly'),
-            'use_strict_mode' => $this->container->get('session.use_strict_mode'),
-            'use_only_cookies' => $this->container->get('session.use_only_cookies'),
-            'sid_length' => $this->container->get('session.sid_length'),
-            'sid_bits_per_character' => $this->container->get('session.sid_bits_per_character'),
-            'cookie_samesite' => $this->container->get('session.cookie_samesite'),
-        ];
-
-    }
-
 }
