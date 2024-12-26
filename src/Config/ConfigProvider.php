@@ -20,12 +20,12 @@ final class ConfigProvider
             throw new \LogicException('The "app.template_dir" should be a string');
         }
 
-        if (!is_dir($templateDir)) {
-            throw new \LogicException('The "app.template_dir" should be a valid directory');
-        }
-
         if (!str_starts_with($templateDir, '/')) {
             $templateDir = filepath_join($this->container->get('michel.project_dir'), $templateDir);
+        }
+
+        if (!is_dir($templateDir)) {
+            throw new \LogicException('The "app.template_dir" should be a valid directory');
         }
 
         return $templateDir;
