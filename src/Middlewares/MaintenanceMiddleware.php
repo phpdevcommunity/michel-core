@@ -34,7 +34,41 @@ final class MaintenanceMiddleware implements MiddlewareInterface
                 $renderer = $this->renderer;
                 $response->getBody()->write($renderer($request));
             }else{
-                $response->getBody()->write('We are in maintenance');
+                $response->getBody()->write('
+    <html>
+        <head>
+            <title>Maintenance Mode</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    background-color: #f8f9fa;
+                    color: #333;
+                    padding: 50px;
+                }
+                h1 {
+                    color: #601D17FF;
+                    font-size: 2.5em;
+                }
+                p {
+                    font-size: 1.2em;
+                    line-height: 1.5;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>We\'re Undergoing Maintenance</h1>
+                <p>Our website is currently down for scheduled maintenance to improve your experience. We\'ll be back online shortly.</p>
+                <p>Thank you for your patience.</p>
+            </div>
+        </body>
+    </html>
+');
             }
             return $response;
         }

@@ -2,7 +2,6 @@
 
 namespace PhpDevCommunity\Michel\Core;
 
-use PhpDevCommunity\Michel\Core\Manager\CacheManager;
 use PhpDevCommunity\Michel\Core\Package\PackageInterface;
 
 final class Dependency

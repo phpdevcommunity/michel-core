@@ -17,7 +17,7 @@ final class ConfigProvider
     {
         $templateDir = $this->container->get('app.template_dir');
         if (!is_string($templateDir)) {
-            throw new \LogicException('The "app.template_dir" should be a string');
+            throw new \LogicException(sprintf('The "app.template_dir" configuration must be a string. Given: %s', gettype($templateDir)));
         }
 
         if (!str_starts_with($templateDir, '/')) {
@@ -25,7 +25,7 @@ final class ConfigProvider
         }
 
         if (!is_dir($templateDir)) {
-            throw new \LogicException('The "app.template_dir" should be a valid directory');
+            throw new \LogicException(sprintf('The specified "app.template_dir" directory does not exist: "%s".', $templateDir));
         }
 
         return $templateDir;
@@ -34,15 +34,20 @@ final class ConfigProvider
     public function getAllowedIps(): array
     {
         $allowedIps = $this->container->get('app.allowed_ips');
+
         if (is_string($allowedIps)) {
             $allowedIps = explode(',', $allowedIps);
         }
+
         if (!is_array($allowedIps)) {
             throw new \LogicException('The "app.allowed_ips" should be an array of IP addresses');
         }
+
+        $allowedIps = array_filter($allowedIps);
+
         foreach ($allowedIps as $value) {
             if (!filter_var($value, FILTER_VALIDATE_IP)) {
-                throw new \LogicException('The "app.allowed_ips" should be an array of IP addresses');
+                throw new \LogicException(sprintf('Invalid IP address detected: "%s". Ensure all values in allowed IPs are valid IP addresses.', $value));
             }
         }
         return $allowedIps;
