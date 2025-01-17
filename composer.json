@@ -15,11 +15,11 @@
             "Test\\PhpDevCommunity\\Michel\\Core\\": "tests"
         },
         "files": [
-            "src/helpers.php",
-            "src/helpers_file.php",
-            "src/helpers_string.php",
-            "src/helpers_array.php",
-            "src/helpers_date.php"
+            "functions/helpers.php",
+            "functions/helpers_file.php",
+            "functions/helpers_string.php",
+            "functions/helpers_array.php",
+            "functions/helpers_date.php"
         ]
     },
     "require": {
@@ -37,6 +37,7 @@
         "phpdevcommunity/php-router": "^3.0",
         "phpdevcommunity/php-options-resolver": "^1.0",
         "phpdevcommunity/php-console": "^1.0",
+        "phpdevcommunity/php-vardumper": "^1.0",
         "phpdevcommunity/psr14-event-dispatcher": "^1.0"
     },
     "minimum-stability": "alpha",

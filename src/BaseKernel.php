@@ -5,6 +5,8 @@ namespace PhpDevCommunity\Michel\Core;
 
 use DateTimeImmutable;
 use PhpDevCommunity\DotEnv;
+use PhpDevCommunity\Michel\Core\Debug\ExecutionProfiler;
+use PhpDevCommunity\Michel\Core\Debug\RequestProfiler;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ErrorHandler;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ExceptionHandler;
 use PhpDevCommunity\Michel\Core\Handler\RequestHandler;
@@ -44,11 +46,12 @@ abstract class BaseKernel
     private string $env = self::DEFAULT_ENV;
     protected ContainerInterface $container;
     /**
-     * @var array<MiddlewareInterface, string>
+     * @var array<MiddlewareInterface>|array<string>
      */
     private array $middlewareCollection = [];
 
-    protected array $debug = [];
+    protected ?RequestProfiler $requestProfiler = null;
+    protected ?ExecutionProfiler $executionProfiler = null;
 
 
     /**
@@ -69,35 +72,14 @@ abstract class BaseKernel
     {
         try {
             $request = $request->withAttribute('request_id', strtoupper(uniqid('REQ')));
+            if ($this->requestProfiler instanceof RequestProfiler) {
+                $this->requestProfiler->start($request);
+            }
             $requestHandler = new RequestHandler($this->container, $this->middlewareCollection);
             $response = $requestHandler->handle($request);
-            if (!empty($this->debug)) {
-                $startTime = $this->debug['start_time'];
-                unset($this->debug['start_time']);
-                $diff = (microtime(true) - $startTime);
-                $this->log([
-                        '@timestamp' => (new DateTimeImmutable())->format('c'),
-                        'log.level' => 'debug',
-                        'id' => $request->getAttribute('request_id'),
-                        'event.duration' => $diff,
-                        'metrics' => [
-                            'memory.usage' => _m_convert(memory_get_usage(true)),
-                            'load_time.ms' => $diff * 1000,
-                            'load_time.s' => number_format($diff, 3),
-                        ],
-                        'http.request' => [
-                            'method' => $request->getMethod(),
-                            'url' => $request->getUri()->__toString(),
-                            'path' => $request->getUri()->getPath(),
-                            'body' => $request->getBody()->getContents(),
-                            'headers' => $request->getHeaders(),
-                            'query' => $request->getQueryParams(),
-                            'post' => $request->getParsedBody(),
-                            'cookies' => $request->getCookieParams(),
-                            'protocol' => $request->getProtocolVersion(),
-                            'server' => $request->getServerParams(),
-                        ]
-                    ] + $this->debug, 'debug.log');
+            if ($this->requestProfiler instanceof RequestProfiler) {
+                $metrics = $this->requestProfiler->stop();
+                $this->log($metrics, 'debug.log');
             }
             return $response;
         } catch (Throwable $exception) {
@@ -181,15 +163,11 @@ abstract class BaseKernel
     final private function boot(): void
     {
         $this->initEnv();
+        $this->configureErrorHandling();
+        $this->configureTimezone();
 
-        ini_set("error_log", $this->getLogDir().'/error_log.log');
-        date_default_timezone_set(getenv('APP_TIMEZONE'));
-
-        error_reporting(0);
         if ($this->getEnv() === 'dev') {
-            $this->debug['start_time'] = microtime(true);
-            $this->debug['environment'] = $this->getEnv();
-            ErrorHandler::register();
+            $this->initializeDevelopmentEnvironment();
         }
 
         $middleware = $this->loadConfigurationIfExists('middleware.php');
@@ -198,23 +176,7 @@ abstract class BaseKernel
         });
         $this->middlewareCollection = array_keys($middleware);
 
-        list($services, $parameters, $listeners, $routes, $commands, $packages) = (new Dependency($this))->load();
-        $definitions = array_merge(
-            $parameters,
-            $services,
-            [
-                'michel.packages' => $packages,
-                'michel.commands' => $commands,
-                'michel.listeners' => $listeners,
-                'michel.routes' => $routes,
-                'michel.middleware' => $this->middlewareCollection,
-                BaseKernel::class => $this
-            ]
-        );
-        $definitions['michel.services_ids'] = array_keys($definitions);
-
-        $this->container = $this->loadContainer($definitions);
-        unset($services, $parameters, $listeners, $routes, $commands, $packages, $definitions);
+        $this->loadDependencies();
         $this->afterBoot();
     }
 
@@ -238,6 +200,28 @@ abstract class BaseKernel
         $this->env = getenv('APP_ENV');
     }
 
+     private function configureErrorHandling(): void
+    {
+        ini_set("log_errors", '1');
+        ini_set("error_log", $this->getLogDir() . '/error_log.log');
+
+        ini_set("display_startup_errors", '0');
+        ini_set("display_errors", '0');
+        ini_set("html_errors", '0');
+        ini_set("track_errors", '0');
+
+        error_reporting(E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR);
+    }
+
+    private function configureTimezone(): void
+    {
+        $timezone = getenv('APP_TIMEZONE');
+        if ($timezone === false) {
+            throw new \RuntimeException('APP_TIMEZONE environment variable is not set.');
+        }
+        date_default_timezone_set($timezone);
+    }
+
     final public function loadConfigurationIfExists(string $fileName): array
     {
         $filePath = filepath_join( $this->getConfigDir(), $fileName);
@@ -246,6 +230,42 @@ abstract class BaseKernel
         }
 
         return [];
+    }
+
+    private function initializeDevelopmentEnvironment(): void
+    {
+        $this->executionProfiler = new ExecutionProfiler([
+            'environment' => $this->getEnv()
+        ]);
+        $this->executionProfiler->start();
+
+        $this->requestProfiler = new RequestProfiler([
+            'environment' => $this->getEnv()
+        ]);
+        ErrorHandler::register();
+
+    }
+
+    private function loadDependencies(): void
+    {
+        list($services, $parameters, $listeners, $routes, $commands, $packages) = (new Dependency($this))->load();
+
+        $definitions = array_merge(
+            $parameters,
+            $services,
+            [
+                'michel.packages' => $packages,
+                'michel.commands' => $commands,
+                'michel.listeners' => $listeners,
+                'michel.routes' => $routes,
+                'michel.middleware' => $this->middlewareCollection,
+                BaseKernel::class => $this
+            ]
+        );
+        $definitions['michel.services_ids'] = array_keys($definitions);
+
+        $this->container = $this->loadContainer($definitions);
+        unset($services, $parameters, $listeners, $routes, $commands, $packages, $definitions);
     }
 
     final private static function getAvailableEnvironments(): array
@@ -258,5 +278,13 @@ abstract class BaseKernel
         putenv(sprintf('%s=%s', $name, $value));
         $_ENV[$name] = $value;
         $_SERVER[$name] = $value;
+    }
+
+    final public function __destruct()
+    {
+        if ($this->executionProfiler instanceof ExecutionProfiler) {
+            $log = $this->executionProfiler->stop();
+            $this->log($log, 'debug.log');
+        }
     }
 }

@@ -29,4 +29,5 @@ final class ForceHttpsMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
+
 }
