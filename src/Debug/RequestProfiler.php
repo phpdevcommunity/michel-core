@@ -28,7 +28,7 @@ final class RequestProfiler
 
         $this->isStarted = true;
         $this->startTime = microtime(true);
-        $this->startMemory = memory_get_usage(true);
+        $this->startMemory = memory_get_usage();
         $this->request = $request;
     }
 
@@ -39,7 +39,7 @@ final class RequestProfiler
         }
 
         $endTime = microtime(true);
-        $endMemory = memory_get_usage(true);
+        $endMemory = memory_get_usage();
 
         $duration = $endTime - $this->startTime;
         $memoryUsage = $endMemory - $this->startMemory;
@@ -60,6 +60,8 @@ final class RequestProfiler
             'event.duration' => $duration,
             'metrics' => [
                 'memory.usage' => $this->convertMemory($memory),
+                'php_memory.usage' => $this->convertMemory(memory_get_usage()),
+                'peak_memory.usage' => $this->convertMemory(memory_get_peak_usage(true)),
                 'load_time.ms' => $duration * 1000,
                 'load_time.s' => number_format($duration, 3),
             ],
