@@ -1,0 +1,47 @@
+{
+    "name": "phpdevcommunity/michel-core",
+    "description": "The Michel Framework Core is the core library of the Michel Framework, a lightweight and versatile PHP framework designed for simplifying web development tasks.",
+    "type": "package",
+    "license": "MPL-2.0",
+    "authors": [
+        {
+            "name": "F. Michel",
+            "homepage": "https://www.phpdevcommunity.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "PhpDevCommunity\\Michel\\Core\\": "src",
+            "Test\\PhpDevCommunity\\Michel\\Core\\": "tests"
+        },
+        "files": [
+            "functions/helpers.php",
+            "functions/helpers_file.php",
+            "functions/helpers_string.php",
+            "functions/helpers_array.php",
+            "functions/helpers_date.php"
+        ]
+    },
+    "require": {
+        "php": ">=7.4",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "psr/container": "^1.0|^2.0",
+        "psr/http-message": "~1.0|^2.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/log": "^1.1|^2.0",
+        "phpdevcommunity/php-dotenv": "^3.0",
+        "phpdevcommunity/php-router": "^3.0",
+        "phpdevcommunity/php-options-resolver": "^1.0",
+        "phpdevcommunity/php-console": "^1.0",
+        "phpdevcommunity/php-vardumper": "^1.0",
+        "phpdevcommunity/psr14-event-dispatcher": "^1.0"
+    },
+    "minimum-stability": "alpha",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
+}
