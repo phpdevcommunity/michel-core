@@ -10,7 +10,6 @@ final class RequestProfiler
 {
     private bool $isStarted = false;
     private float $startTime;
-    private int $startMemory;
     private ServerRequestInterface $request;
 
     private array $metadata;
@@ -28,7 +27,6 @@ final class RequestProfiler
 
         $this->isStarted = true;
         $this->startTime = microtime(true);
-        $this->startMemory = memory_get_usage(true);
         $this->request = $request;
     }
 
@@ -39,28 +37,30 @@ final class RequestProfiler
         }
 
         $endTime = microtime(true);
-        $endMemory = memory_get_usage(true);
-
         $duration = $endTime - $this->startTime;
-        $memoryUsage = $endMemory - $this->startMemory;
 
-        $log = $this->createLog($memoryUsage, $duration);
+        $log = $this->createLog($duration);
 
         $this->isStarted = false;
         return array_merge($log, $this->metadata);
     }
 
-    private function createLog(int $memory, float $duration): array
+    private function createLog(float $duration): array
     {
         $request = $this->request;
+        $memoryUsage = memory_get_usage(true);
+        $memoryPeak = memory_get_peak_usage(true);
         return [
             '@timestamp' => (new DateTimeImmutable())->format('c'),
             'log.level' => 'debug',
             'id' => $request->getAttribute('request_id', 'unknown'),
             'event.duration' => $duration,
             'metrics' => [
-                'memory.usage' => $this->convertMemory($memory),
-                'load_time.ms' => $duration * 1000,
+                'memory.usage' => $memoryUsage,
+                'memory.usage.human' => $this->convertMemory($memoryUsage),
+                'memory.peak' => $memoryPeak,
+                'memory.peak.human' => $this->convertMemory(memory_get_peak_usage(true)),
+                'load_time.ms' => number_format($duration * 1000, 3),
                 'load_time.s' => number_format($duration, 3),
             ],
             'http.request' => [
@@ -80,7 +80,7 @@ final class RequestProfiler
 
     private function convertMemory(int $size): string
     {
-        $unit = array('b', 'kb', 'mb', 'gb', 'tb', 'pb');
+        $unit = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
         return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
     }
 

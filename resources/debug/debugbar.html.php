@@ -28,11 +28,6 @@
  */
 ?>
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-    }
-
     .__michel_debug_navbar {
         overflow: hidden;
         background-color: #1e232d;
@@ -40,6 +35,8 @@
         bottom: 0;
         width: 100%;
         display: flex;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
     }
 
     .__michel_debug_navbar a {
@@ -48,34 +45,37 @@
         text-align: center;
         padding: 12px 14px;
         text-decoration: none;
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .__michel_debug_navbar a:hover {
         background-color: #07193e;
     }
+    .__michel_debug_navbar a:hover > .__michel_debug_value {
+        transform: scale(1.1);
+    }
 
     .__michel_debug_value {
         font-weight: bold;
         margin-left: 5px;
-        font-size: 12px;
+        font-size: 11px;
         color: #ececec;
+        display: inline-block;
     }
-
 </style>
 <div class="__michel_debug_navbar">
     <a href="#time" class="active">
-        Time <span class="__michel_debug_value"><?php echo round($profiler['metrics']['load_time.ms'], 4) ?> ms</span>
+        Time <span class="__michel_debug_value"><?php echo $profiler['metrics']['load_time.ms'] ?> ms</span>
     </a>
     <a href="#memory">
-        MEMORY <span class="__michel_debug_value"><?php echo strtolower($profiler['metrics']['memory.peak']) ?></span>
+        MEMORY <span class="__michel_debug_value"><?php echo $profiler['metrics']['memory.peak.human'] ?></span>
     </a>
     <a href="#request">
         METHOD <span class="__michel_debug_value"><?php echo $profiler['http.request']['method'] ?></span>
     </a>
     <a href="#env">
-        ENVIRONMENT <span class="__michel_debug_value"><?php echo strtoupper($profiler['environment']) ?></span>
+        ENV <span class="__michel_debug_value"><?php echo strtoupper($profiler['environment']) ?></span>
     </a>
-    <a href="#php_version">PHP <span class="__michel_debug_value"><?php echo PHP_VERSION ?> 🐘</span> </a>
+    <a href="#php_version">PHP <span class="__michel_debug_value"><?php echo $profiler['php_version'] ?> 🐘</span> </a>
 </div>
 

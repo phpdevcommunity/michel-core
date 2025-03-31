@@ -40,7 +40,6 @@ final class DebugMiddleware implements MiddlewareInterface
         ]);
 
         $options = $optionResolver->resolve($options);
-        $this->requestProfiler = new RequestProfiler();
         $this->debug = $options['debug'];
         $this->profiler = $options['profiler'];
         $this->env = strtolower($options['env']);
@@ -92,9 +91,9 @@ final class DebugMiddleware implements MiddlewareInterface
 
     private function initializeDevelopmentEnvironment(): void
     {
-
         $this->requestProfiler = new RequestProfiler([
-            'environment' => $this->env
+            'environment' => $this->env,
+            'php_version' => PHP_VERSION
         ]);
         ErrorHandler::register();
     }
@@ -112,10 +111,6 @@ final class DebugMiddleware implements MiddlewareInterface
             $logFile = $this->env . '.log';
         }
 
-        error_log(
-            json_encode($data, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) . PHP_EOL,
-            3,
-            filepath_join($this->logDir, $logFile)
-        );
+        file_put_contents( filepath_join($this->logDir, $logFile), json_encode($data, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND );
     }
 }
