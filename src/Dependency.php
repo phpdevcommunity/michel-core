@@ -59,7 +59,7 @@ final class Dependency
         $parameters = $this->loadConfigurationIfExists($fileName);
 
         $parameters['michel.environment'] = $this->baseKernel->getEnv();
-        $parameters['michel.debug'] = $this->baseKernel->getEnv() === 'dev';
+        $parameters['michel.debug'] = $_ENV['APP_DEBUG'] ?? $this->baseKernel->getEnv() === 'dev';
         $parameters['michel.project_dir'] = $this->baseKernel->getProjectDir();
         $parameters['michel.cache_dir'] = $this->baseKernel->getCacheDir();
         $parameters['michel.logs_dir'] = $this->baseKernel->getLogDir();

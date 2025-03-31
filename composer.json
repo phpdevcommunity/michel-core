@@ -38,7 +38,8 @@
         "phpdevcommunity/php-options-resolver": "^1.0",
         "phpdevcommunity/php-console": "^1.0",
         "phpdevcommunity/php-vardumper": "^1.0",
-        "phpdevcommunity/psr14-event-dispatcher": "^1.0"
+        "phpdevcommunity/psr14-event-dispatcher": "^1.0",
+        "phpdevcommunity/template-bridge": "^1.0"
     },
     "minimum-stability": "alpha",
     "require-dev": {

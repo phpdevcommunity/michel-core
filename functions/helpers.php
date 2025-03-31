@@ -104,11 +104,11 @@ if (!function_exists('response')) {
      * @param int $status The HTTP status code.
      * @return ResponseInterface The HTTP response.
      */
-    function response(string $content = '', int $status = 200): ResponseInterface
+    function response(string $content = '', int $status = 200, $contentType = 'text/html'): ResponseInterface
     {
         $response = response_factory()->createResponse($status);
         $response->getBody()->write($content);
-        return $response;
+        return $response->withHeader('Content-Type', $contentType);
     }
 }
 

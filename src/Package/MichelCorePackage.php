@@ -16,14 +16,15 @@ use PhpDevCommunity\Michel\Core\Command\MakeControllerCommand;
 use PhpDevCommunity\Michel\Core\Config\ConfigProvider;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ExceptionHandler;
+use PhpDevCommunity\Michel\Core\Middlewares\DebugMiddleware;
 use PhpDevCommunity\Michel\Core\Middlewares\ForceHttpsMiddleware;
 use PhpDevCommunity\Michel\Core\Middlewares\IpRestrictionMiddleware;
 use PhpDevCommunity\Michel\Core\Middlewares\MaintenanceMiddleware;
-use PhpDevCommunity\Renderer\PhpRenderer;
 use PhpDevCommunity\Route;
 use PhpDevCommunity\Router;
 use PhpDevCommunity\RouterInterface;
 use PhpDevCommunity\RouterMiddleware;
+use PhpDevCommunity\TemplateBridge\Renderer\PhpRenderer;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment;
@@ -82,10 +83,18 @@ final class MichelCorePackage implements PackageInterface
                  * @var array<Route> $routes
                  */
                 $routes = $container->get('michel.routes');
-                $router =  new Router($routes, $container->get('app.url'));
+                $router = new Router($routes, $container->get('app.url'));
                 unset($routes);
 
                 return $router;
+            },
+           DebugMiddleware::class => static function (ContainerInterface $container) {
+                return new DebugMiddleware([
+                    'debug' => $container->get('michel.debug'),
+                    'profiler' => $container->get('app.profiler'),
+                    'env' => $container->get('michel.environment'),
+                    'log_dir' => $container->get('michel.logs_dir'),
+                ]);
             },
             RouterMiddleware::class => static function (ContainerInterface $container) {
                 return new RouterMiddleware($container->get(RouterInterface::class), response_factory());
@@ -139,11 +148,16 @@ final class MichelCorePackage implements PackageInterface
         return [
             'app.url' => getenv('APP_URL') ?: '', // Application URL
             'app.locale' => getenv('APP_LOCALE') ?: 'en', // Default locale
-            'app.template_dir' => getenv('APP_TEMPLATE_DIR') ?: 'templates', // Template directory
+            'app.template_dir' => getenv('APP_TEMPLATE_DIR') ?: function (ContainerInterface $container) {
+                return filepath_join($container->get('michel.project_dir'), 'templates');
+            }, // Template directory
             'app.allowed_ips' => getenv('APP_ALLOWED_IPS') ?: '', // Allowed IP addresses
             'app.secret_key' => getenv('APP_SECRET_KEY') ?: '', // Secret
             'app.maintenance' => $_ENV['APP_MAINTENANCE'] ?? false, // Maintenance mode
             'app.force_https' => $_ENV['APP_FORCE_HTTPS'] ?? false, // Force HTTPS
+            'app.profiler' => $_ENV['APP_PROFILER'] ?? function (ContainerInterface $container) {
+                    return $container->get('michel.environment') == 'dev';
+                }, // Debug mode
         ];
     }
 

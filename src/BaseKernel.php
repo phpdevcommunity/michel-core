@@ -50,10 +50,6 @@ abstract class BaseKernel
      */
     private array $middlewareCollection = [];
 
-    protected ?RequestProfiler $requestProfiler = null;
-    protected ?ExecutionProfiler $executionProfiler = null;
-
-
     /**
      * BaseKernel constructor.
      */
@@ -72,16 +68,9 @@ abstract class BaseKernel
     {
         try {
             $request = $request->withAttribute('request_id', strtoupper(uniqid('REQ')));
-            if ($this->requestProfiler instanceof RequestProfiler) {
-                $this->requestProfiler->start($request);
-            }
+
             $requestHandler = new RequestHandler($this->container, $this->middlewareCollection);
-            $response = $requestHandler->handle($request);
-            if ($this->requestProfiler instanceof RequestProfiler) {
-                $metrics = $this->requestProfiler->stop();
-                $this->log($metrics, 'debug.log');
-            }
-            return $response;
+            return $requestHandler->handle($request);
         } catch (Throwable $exception) {
             if (!$exception instanceof HttpExceptionInterface) {
                 $this->logException($exception, $request->getAttribute('request_id'));
@@ -166,10 +155,6 @@ abstract class BaseKernel
         $this->configureErrorHandling();
         $this->configureTimezone();
 
-        if ($this->getEnv() === 'dev') {
-            $this->initializeDevelopmentEnvironment();
-        }
-
         $middleware = $this->loadConfigurationIfExists('middleware.php');
         $middleware = array_filter($middleware, function ($environments) {
             return in_array($this->getEnv(), $environments);
@@ -200,7 +185,7 @@ abstract class BaseKernel
         $this->env = getenv('APP_ENV');
     }
 
-     private function configureErrorHandling(): void
+    private function configureErrorHandling(): void
     {
         ini_set("log_errors", '1');
         ini_set("error_log", $this->getLogDir() . '/error_log.log');
@@ -230,20 +215,6 @@ abstract class BaseKernel
         }
 
         return [];
-    }
-
-    private function initializeDevelopmentEnvironment(): void
-    {
-        $this->executionProfiler = new ExecutionProfiler([
-            'environment' => $this->getEnv()
-        ]);
-        $this->executionProfiler->start();
-
-        $this->requestProfiler = new RequestProfiler([
-            'environment' => $this->getEnv()
-        ]);
-        ErrorHandler::register();
-
     }
 
     private function loadDependencies(): void
@@ -278,13 +249,5 @@ abstract class BaseKernel
         putenv(sprintf('%s=%s', $name, $value));
         $_ENV[$name] = $value;
         $_SERVER[$name] = $value;
-    }
-
-    final public function __destruct()
-    {
-        if ($this->executionProfiler instanceof ExecutionProfiler) {
-            $log = $this->executionProfiler->stop();
-            $this->log($log, 'debug.log');
-        }
     }
 }

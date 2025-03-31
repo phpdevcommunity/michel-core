@@ -27,6 +27,11 @@ final class ExecutionProfiler
         $this->startMemory = memory_get_usage(true);
     }
 
+    public function addMetadata(string $key, $value)
+    {
+        $this->metadata[$key][] = $value;
+    }
+
     public function stop(): array
     {
         if ($this->isStarted === false) {
