@@ -38,8 +38,7 @@ use function sprintf;
 abstract class BaseKernel
 {
     private const DEFAULT_ENV = 'prod';
-    public const VERSION = '0.1.0-alpha';
-    public const NAME = 'MICHEL';
+    public const VERSION = '1.0.0-alpha';
     private const DEFAULT_ENVIRONMENTS = [
         'dev',
         'prod'
@@ -190,6 +189,10 @@ abstract class BaseKernel
 
     private function configureErrorHandling(): void
     {
+        if ($this->getEnv() === 'dev') {
+            ErrorHandler::register();
+            return;
+        }
         ini_set("log_errors", '1');
         ini_set("error_log", $this->getLogDir() . '/error_log.log');
 

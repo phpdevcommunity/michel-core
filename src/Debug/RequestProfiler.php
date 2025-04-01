@@ -68,7 +68,7 @@ final class RequestProfiler
                 'memory.usage.human' => $this->convertMemory($memoryUsage),
                 'memory.peak' => $memoryPeak,
                 'memory.peak.human' => $this->convertMemory(memory_get_peak_usage(true)),
-                'load_time.ms' => number_format($duration * 1000, 3),
+                'load_time.ms' => ceil($duration * 1000),
                 'load_time.s' => number_format($duration, 3),
             ],
             'http.request' => [

@@ -20,6 +20,14 @@ final class DebugDataCollector
         $this->data[$key] = $value;
     }
 
+    public function push(string $key, $value): void
+    {
+        if (!$this->isEnabled) {
+            return;
+        }
+        $this->data[$key][] = $value;
+    }
+
     public function getData(): array
     {
         return $this->data;

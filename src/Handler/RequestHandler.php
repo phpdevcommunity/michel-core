@@ -3,6 +3,7 @@
 namespace PhpDevCommunity\Michel\Core\Handler;
 
 use LogicException;
+use PhpDevCommunity\Michel\Core\Debug\DebugDataCollector;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -57,6 +58,10 @@ final class RequestHandler implements RequestHandlerInterface
                     is_object($middleware) ? get_class($middleware) : gettype($middleware)
                 )
             );
+        }
+        $debugCollector = $request->getAttribute('debug_collector');
+        if ($debugCollector instanceof DebugDataCollector) {
+            $debugCollector->push('middlewares_executed', get_class($middleware));
         }
 
         return $middleware->process($request, $this);

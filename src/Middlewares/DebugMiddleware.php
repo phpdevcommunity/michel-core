@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpDevCommunity\Michel\Core\Middlewares;
 
+use PhpDevCommunity\Michel\Core\Debug\DebugDataCollector;
 use PhpDevCommunity\Michel\Core\Debug\RequestProfiler;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ErrorHandler;
 use PhpDevCommunity\Resolver\Option;
@@ -44,7 +45,6 @@ final class DebugMiddleware implements MiddlewareInterface
         $this->profiler = $options['profiler'];
         $this->env = strtolower($options['env']);
         $this->logDir = rtrim($options['log_dir'], '/') . '/';
-        $this->initializeDevelopmentEnvironment();
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -53,10 +53,16 @@ final class DebugMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        $this->initializeDevelopmentEnvironment();
+
         $this->requestProfiler->start($request);
 
         $response = $handler->handle($request);
+        /**
+         * @var DebugDataCollector $debugCollector
+         */
         $debugCollector = $request->getAttribute('debug_collector');
+        $debugCollector->add('response_code', $response->getStatusCode());
         if ($debugCollector) {
             $this->requestProfiler->withDebugDataCollector($debugCollector);
         }
@@ -83,8 +89,14 @@ final class DebugMiddleware implements MiddlewareInterface
                     $json = json_decode($content, true);
                     if (is_array($json)) {
                         unset($requestProfilerData['http.request']);
-                        $json['__debug'] = $requestProfilerData;
-                        $response = $response->withBody(json_response($json)->getBody());
+                        $requestProfilerDataFlat = array_dot($requestProfilerData);
+                        foreach ($requestProfilerDataFlat as $key => $value) {
+                            $key = str_replace( '@', '', $key);
+                            $key = str_replace( '__', '', $key);
+                            $key = str_replace( '_', '-', $key);
+                            $key = str_replace( '.', '-', $key);
+                            $response = $response->withAddedHeader(sprintf('X-Debug-%s', $key), $value);
+                        }
                     }
                 }
             }
@@ -103,8 +115,8 @@ final class DebugMiddleware implements MiddlewareInterface
             'php_extensions' => implode(', ', get_loaded_extensions()),
             'php_sapi' => php_sapi_name(),
             'php_memory_limit' => ini_get('memory_limit'),
+            'php_timezone' => date_default_timezone_get(),
         ]);
-        ErrorHandler::register();
     }
 
     final protected function log(array $data, string $logFile = null): void

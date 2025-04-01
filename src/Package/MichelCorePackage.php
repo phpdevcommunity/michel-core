@@ -92,7 +92,7 @@ final class MichelCorePackage implements PackageInterface
             DebugDataCollector::class => static function (ContainerInterface $container): DebugDataCollector {
                 return new DebugDataCollector($container->get('michel.debug'));
             },
-           DebugMiddleware::class => static function (ContainerInterface $container) {
+            DebugMiddleware::class => static function (ContainerInterface $container) {
                 return new DebugMiddleware([
                     'debug' => $container->get('michel.debug'),
                     'profiler' => $container->get('app.profiler'),

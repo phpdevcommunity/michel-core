@@ -6,6 +6,7 @@ namespace PhpDevCommunity\Michel\Core\Middlewares;
 
 use BadMethodCallException;
 use LogicException;
+use PhpDevCommunity\Michel\Core\Debug\DebugDataCollector;
 use PhpDevCommunity\Route;
 use PhpDevCommunity\RouterMiddleware;
 use Psr\Container\ContainerInterface;
@@ -68,8 +69,18 @@ final class ControllerMiddleware implements MiddlewareInterface
         $controller = $handler[0];
         $action = $handler[1];
 
+        if ($controller instanceof \Closure) {
+            throw new LogicException('Closures are not supported as controllers. Route name: '.$route->getName());
+        }
+
         if (is_string($controller)) {
             $controller = $this->container->get($controller);
+        }
+
+        $debugCollector = $request->getAttribute('debug_collector');
+        if ($debugCollector instanceof DebugDataCollector) {
+            $debugCollector->add('route_name', $route->getName());
+            $debugCollector->add('controller', sprintf('%s::%s', get_class($controller), $action ?? '__invoke'));
         }
 
         if (is_callable($controller) && $action === null) {
