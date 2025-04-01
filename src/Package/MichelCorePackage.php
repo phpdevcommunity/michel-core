@@ -14,6 +14,7 @@ use PhpDevCommunity\Michel\Core\Command\LogClearCommand;
 use PhpDevCommunity\Michel\Core\Command\MakeCommandCommand;
 use PhpDevCommunity\Michel\Core\Command\MakeControllerCommand;
 use PhpDevCommunity\Michel\Core\Config\ConfigProvider;
+use PhpDevCommunity\Michel\Core\Debug\DebugDataCollector;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ExceptionHandler;
 use PhpDevCommunity\Michel\Core\Middlewares\DebugMiddleware;
@@ -87,6 +88,9 @@ final class MichelCorePackage implements PackageInterface
                 unset($routes);
 
                 return $router;
+            },
+            DebugDataCollector::class => static function (ContainerInterface $container): DebugDataCollector {
+                return new DebugDataCollector($container->get('michel.debug'));
             },
            DebugMiddleware::class => static function (ContainerInterface $container) {
                 return new DebugMiddleware([

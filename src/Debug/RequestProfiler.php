@@ -30,6 +30,14 @@ final class RequestProfiler
         $this->request = $request;
     }
 
+    public function withDebugDataCollector(DebugDataCollector $debugDataCollector): self
+    {
+        foreach ($debugDataCollector->getData() as $key => $value) {
+            $this->metadata["__$key"] = $value;
+        }
+        return $this;
+    }
+
     public function stop(): array
     {
         if ($this->isStarted === false) {
@@ -67,7 +75,7 @@ final class RequestProfiler
                 'method' => $request->getMethod(),
                 'url' => $request->getUri()->__toString(),
                 'path' => $request->getUri()->getPath(),
-                'body' => $request->getBody()->getContents(),
+                'body' => (string)$request->getBody(),
                 'headers' => $request->getHeaders(),
                 'query' => $request->getQueryParams(),
                 'post' => $request->getParsedBody() ?? [],
@@ -83,5 +91,4 @@ final class RequestProfiler
         $unit = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
         return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
     }
-
 }

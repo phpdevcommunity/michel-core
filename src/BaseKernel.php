@@ -5,6 +5,7 @@ namespace PhpDevCommunity\Michel\Core;
 
 use DateTimeImmutable;
 use PhpDevCommunity\DotEnv;
+use PhpDevCommunity\Michel\Core\Debug\DebugDataCollector;
 use PhpDevCommunity\Michel\Core\Debug\ExecutionProfiler;
 use PhpDevCommunity\Michel\Core\Debug\RequestProfiler;
 use PhpDevCommunity\Michel\Core\ErrorHandler\ErrorHandler;
@@ -49,6 +50,7 @@ abstract class BaseKernel
      * @var array<MiddlewareInterface>|array<string>
      */
     private array $middlewareCollection = [];
+    private DebugDataCollector $debugDataCollector;
 
     /**
      * BaseKernel constructor.
@@ -68,6 +70,7 @@ abstract class BaseKernel
     {
         try {
             $request = $request->withAttribute('request_id', strtoupper(uniqid('REQ')));
+            $request = $request->withAttribute('debug_collector', $this->debugDataCollector);
 
             $requestHandler = new RequestHandler($this->container, $this->middlewareCollection);
             return $requestHandler->handle($request);
@@ -236,6 +239,7 @@ abstract class BaseKernel
         $definitions['michel.services_ids'] = array_keys($definitions);
 
         $this->container = $this->loadContainer($definitions);
+        $this->debugDataCollector = $this->container->get(DebugDataCollector::class);
         unset($services, $parameters, $listeners, $routes, $commands, $packages, $definitions);
     }
 

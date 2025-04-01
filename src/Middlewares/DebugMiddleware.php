@@ -25,10 +25,10 @@ final class DebugMiddleware implements MiddlewareInterface
     public function __construct(array $options = [])
     {
         $optionResolver = new OptionsResolver([
-            (new Option('debug'))->setDefaultValue(false)->validator( function ($value) {
+            (new Option('debug'))->setDefaultValue(false)->validator(function ($value) {
                 return is_bool($value);
             }),
-            (new Option('profiler'))->setDefaultValue(false)->validator( function ($value) {
+            (new Option('profiler'))->setDefaultValue(false)->validator(function ($value) {
                 return is_bool($value);
             }),
             (new Option('env'))->setDefaultValue('env')->validator(function ($value) {
@@ -56,12 +56,16 @@ final class DebugMiddleware implements MiddlewareInterface
         $this->requestProfiler->start($request);
 
         $response = $handler->handle($request);
-        $requestProfiler = $this->requestProfiler->stop();
+        $debugCollector = $request->getAttribute('debug_collector');
+        if ($debugCollector) {
+            $this->requestProfiler->withDebugDataCollector($debugCollector);
+        }
+        $requestProfilerData = $this->requestProfiler->stop();
         if ($this->profiler) {
             if (strpos($response->getHeaderLine('Content-Type'), 'text/html') !== false) {
-                $renderer = new PhpRenderer(dirname(__DIR__).'/../resources/debug');
+                $renderer = new PhpRenderer(dirname(__DIR__) . '/../resources/debug');
                 $debugBarHtml = $renderer->render('debugbar.html.php', [
-                    'profiler' => $requestProfiler,
+                    'profiler' => $requestProfilerData,
                 ]);
 
                 $body = $response->getBody();
@@ -72,19 +76,21 @@ final class DebugMiddleware implements MiddlewareInterface
                         $debugBarHtml .
                         substr($content, $pos))->getBody());
                 }
-            }elseif (strpos($response->getHeaderLine('Content-Type'), 'application/json') !== false) {
+            } elseif (strpos($response->getHeaderLine('Content-Type'), 'application/json') !== false) {
                 $body = $response->getBody();
                 $content = (string)$body;
-                $json = json_decode($content, true);
-                if (is_array($json)) {
-                    unset($requestProfiler['http.request']);
-                    $json['__profiler'] = $requestProfiler;
-                    $response = $response->withBody(json_response($json)->getBody());
+                if (!empty(trim($content))) {
+                    $json = json_decode($content, true);
+                    if (is_array($json)) {
+                        unset($requestProfilerData['http.request']);
+                        $json['__debug'] = $requestProfilerData;
+                        $response = $response->withBody(json_response($json)->getBody());
+                    }
                 }
             }
         }
 
-        $this->log($requestProfiler, 'debug.log');
+        $this->log($requestProfilerData, 'debug.log');
 
         return $response;
     }
@@ -93,7 +99,10 @@ final class DebugMiddleware implements MiddlewareInterface
     {
         $this->requestProfiler = new RequestProfiler([
             'environment' => $this->env,
-            'php_version' => PHP_VERSION
+            'php_version' => PHP_VERSION,
+            'php_extensions' => implode(', ', get_loaded_extensions()),
+            'php_sapi' => php_sapi_name(),
+            'php_memory_limit' => ini_get('memory_limit'),
         ]);
         ErrorHandler::register();
     }
@@ -111,6 +120,6 @@ final class DebugMiddleware implements MiddlewareInterface
             $logFile = $this->env . '.log';
         }
 
-        file_put_contents( filepath_join($this->logDir, $logFile), json_encode($data, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND );
+        file_put_contents(filepath_join($this->logDir, $logFile), json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND|LOCK_EX);
     }
 }

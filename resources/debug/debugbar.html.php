@@ -65,16 +65,16 @@
 </style>
 <div class="__michel_debug_navbar">
     <a href="#time" class="active">
-        Time <span class="__michel_debug_value"><?php echo $profiler['metrics']['load_time.ms'] ?> ms</span>
+        [REQ] <span class="__michel_debug_value"><?php echo $profiler['metrics']['load_time.ms'] ?> ms</span>
     </a>
     <a href="#memory">
-        MEMORY <span class="__michel_debug_value"><?php echo $profiler['metrics']['memory.peak.human'] ?></span>
+        [MEM] <span class="__michel_debug_value"><?php echo $profiler['metrics']['memory.peak.human'] ?></span>
     </a>
     <a href="#request">
-        METHOD <span class="__michel_debug_value"><?php echo $profiler['http.request']['method'] ?></span>
+        [METHOD] <span class="__michel_debug_value"><?php echo $profiler['http.request']['method'] ?></span>
     </a>
     <a href="#env">
-        ENV <span class="__michel_debug_value"><?php echo strtoupper($profiler['environment']) ?></span>
+        [ENV] <span class="__michel_debug_value"><?php echo strtoupper($profiler['environment']) ?></span>
     </a>
     <a href="#php_version">PHP <span class="__michel_debug_value"><?php echo $profiler['php_version'] ?> 🐘</span> </a>
 </div>
