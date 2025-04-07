@@ -67,7 +67,7 @@ final class ControllerMiddleware implements MiddlewareInterface
 
         $handler = $route->getHandler();
         $controller = $handler[0];
-        $action = $handler[1];
+        $action = $handler[1] ?? null;
 
         if ($controller instanceof \Closure) {
             throw new LogicException('Closures are not supported as controllers. Route name: '.$route->getName());
@@ -87,7 +87,7 @@ final class ControllerMiddleware implements MiddlewareInterface
             return $controller;
         }
 
-        if (method_exists($controller, $action) === false) {
+        if (method_exists($controller, $action ?? '') === false) {
             throw new BadMethodCallException(
                 $action === null
                     ? sprintf('Please use a Method on class %s.', get_class($controller))

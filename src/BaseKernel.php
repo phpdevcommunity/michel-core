@@ -32,13 +32,14 @@ use function sprintf;
 /**
  * @package    PhpDevCommunity Michel
  * @author    PhpDevCommunity <michel@phpdevcommunity.com>
- * @license    https://opensource.org/licenses/MIT	MIT License
+ * @license    https://opensource.org/license/mpl-2-0 Mozilla Public License v2.0
  * @link    https://www.phpdevcommunity.com
  */
 abstract class BaseKernel
 {
     private const DEFAULT_ENV = 'prod';
     public const VERSION = '1.0.0-alpha';
+    public const NAME = 'MICHEL';
     private const DEFAULT_ENVIRONMENTS = [
         'dev',
         'prod'

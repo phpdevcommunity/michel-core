@@ -7,7 +7,7 @@ use PhpDevCommunity\Console\Command\CommandInterface;
 use PhpDevCommunity\Console\InputInterface;
 use PhpDevCommunity\Console\Output\ConsoleOutput;
 use PhpDevCommunity\Console\OutputInterface;
-use PhpDevCommunity\Michel\Core\Router\Route;
+use PhpDevCommunity\Route;
 use Psr\Container\ContainerInterface;
 
 final class DebugRouteCommand implements CommandInterface

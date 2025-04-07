@@ -36,7 +36,7 @@
         width: 100%;
         display: flex;
         height: 40px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        font-family: Inter, sans-serif;
         white-space: nowrap;
     }
 
@@ -46,7 +46,7 @@
         text-align: center;
         padding: 12px 14px;
         text-decoration: none;
-        font-size: 13px;
+        font-size: 12px;
     }
 
     .__michel_debug_navbar a:hover {

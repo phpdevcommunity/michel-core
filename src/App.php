@@ -13,7 +13,7 @@ use Psr\Http\Message\ServerRequestInterface;
 /**
  * @package    PhpDevCommunity Michel
  * @author    PhpDevCommunity <michel@phpdevcommunity.com>
- * @license    https://opensource.org/licenses/MIT	MIT License
+ * @license    https://opensource.org/license/mpl-2-0 Mozilla Public License v2.0
  * @link    https://www.phpdevcommunity.com
  */
 final class App
