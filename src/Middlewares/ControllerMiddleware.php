@@ -99,9 +99,11 @@ final class ControllerMiddleware implements MiddlewareInterface
 
     private static function getArguments(ServerRequestInterface $request): array
     {
-        $attributes = $request->getAttributes();
-        unset($attributes[RouterMiddleware::ATTRIBUTE_KEY]);
-        return array_values($attributes);
+        $route = $request->getAttribute(RouterMiddleware::ATTRIBUTE_KEY);
+        if (!$route instanceof Route) {
+            throw new LogicException('Route not found in request., Maybe you forgot to use PhpDevCommunity\RouterMiddleware?');
+        }
+        return array_values($route->getAttributes());
     }
 
     private static function callController(ServerRequestInterface $request, $controller): ResponseInterface
