@@ -21,12 +21,12 @@ class  SampleKernelTest extends BaseKernel
 
     public function getCacheDir(): string
     {
-        return '';
+        return filepath_join($this->getProjectDir(),'cache');
     }
 
     public function getLogDir(): string
     {
-        return '';
+        return filepath_join($this->getProjectDir(),'log');
     }
 
     public function getConfigDir(): string

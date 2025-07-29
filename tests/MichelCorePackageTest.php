@@ -67,7 +67,7 @@ class MichelCorePackageTest extends TestCase
     public function testGetCommands()
     {
         $package = new MichelCorePackage();
-        $commands = $package->getCommands();
+        $commands = $package->getCommandSources();
         $this->assertNotEmpty($commands);
         foreach ($commands as $command) {
             $this->assertIsString($command);

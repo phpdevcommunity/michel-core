@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PhpDevCommunity\Michel\Core;
 
 use DateTimeImmutable;
+use PhpDevCommunity\Attribute\AttributeRouteCollector;
 use PhpDevCommunity\DotEnv;
 use PhpDevCommunity\Michel\Core\Debug\DebugDataCollector;
 use PhpDevCommunity\Michel\Core\Debug\ExecutionProfiler;
@@ -13,6 +14,7 @@ use PhpDevCommunity\Michel\Core\ErrorHandler\ExceptionHandler;
 use PhpDevCommunity\Michel\Core\Handler\RequestHandler;
 use PhpDevCommunity\Michel\Core\Http\Exception\HttpExceptionInterface;
 use InvalidArgumentException;
+use PhpDevCommunity\Michel\Core\Routing\ControllerFinder;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -45,12 +47,14 @@ abstract class BaseKernel
         'prod'
     ];
     private string $env = self::DEFAULT_ENV;
+    private bool $debug = false;
+
     protected ContainerInterface $container;
     /**
      * @var array<MiddlewareInterface>|array<string>
      */
     private array $middlewareCollection = [];
-    private DebugDataCollector $debugDataCollector;
+    private ?DebugDataCollector $debugDataCollector = null;
 
     /**
      * BaseKernel constructor.
@@ -76,7 +80,7 @@ abstract class BaseKernel
             return $requestHandler->handle($request);
         } catch (Throwable $exception) {
             if (!$exception instanceof HttpExceptionInterface) {
-                $this->logException($exception, $request->getAttribute('request_id'));
+                $this->logException($exception, $request);
             }
 
             $exceptionHandler = $this->container->get(ExceptionHandler::class);
@@ -87,6 +91,11 @@ abstract class BaseKernel
     final public function getEnv(): string
     {
         return $this->env;
+    }
+
+    final public function isDebug(): bool
+    {
+        return $this->debug;
     }
 
     final public function getContainer(): ContainerInterface
@@ -113,12 +122,16 @@ abstract class BaseKernel
         return App::createContainer($definitions, ['cache_dir' => $this->getCacheDir()]);
     }
 
-    final protected function logException(Throwable $exception, string $id = null): void
+    final protected function logException(Throwable $exception, ServerRequestInterface  $request): void
     {
         $this->log([
             '@timestamp' => (new DateTimeImmutable())->format('c'),
             'log.level' => 'error',
-            'id' => $id,
+            'id' => $request->getAttribute('request_id'),
+            'http.request' => [
+                'method' => $request->getMethod(),
+                'url' => $request->getUri()->__toString(),
+            ],
             'message' => $exception->getMessage(),
             'error' => [
                 'code' => $exception->getCode(),
@@ -152,7 +165,7 @@ abstract class BaseKernel
         );
     }
 
-    final private function boot(): void
+    private function boot(): void
     {
         $this->initEnv();
         $this->configureErrorHandling();
@@ -168,10 +181,10 @@ abstract class BaseKernel
         $this->afterBoot();
     }
 
-    final private function initEnv(): void
+    private function initEnv(): void
     {
         (new DotEnv($this->getEnvFile()))->load();
-        foreach (['APP_ENV' => self::DEFAULT_ENV, 'APP_TIMEZONE' => 'UTC', 'APP_LOCALE' => 'en'] as $k => $value) {
+        foreach (['APP_ENV' => self::DEFAULT_ENV, 'APP_TIMEZONE' => 'UTC', 'APP_LOCALE' => 'en', 'APP_DEBUG' => false] as $k => $value) {
             if (getenv($k) === false) {
                 self::putEnv($k, $value);
             }
@@ -185,7 +198,8 @@ abstract class BaseKernel
                     implode('", "', $environments))
             );
         }
-        $this->env = getenv('APP_ENV');
+        $this->env =  strtolower($_ENV['APP_ENV']);
+        $this->debug = $_ENV['APP_DEBUG'] ?: ($this->env === 'dev');
     }
 
     private function configureErrorHandling(): void
@@ -226,8 +240,7 @@ abstract class BaseKernel
 
     private function loadDependencies(): void
     {
-        list($services, $parameters, $listeners, $routes, $commands, $packages) = (new Dependency($this))->load();
-
+        list($services, $parameters, $listeners, $routes, $commands, $packages, $controllers) = (new Dependency($this))->load();
         $definitions = array_merge(
             $parameters,
             $services,
@@ -235,26 +248,40 @@ abstract class BaseKernel
                 'michel.packages' => $packages,
                 'michel.commands' => $commands,
                 'michel.listeners' => $listeners,
-                'michel.routes' => $routes,
                 'michel.middleware' => $this->middlewareCollection,
                 BaseKernel::class => $this
             ]
         );
         $definitions['michel.services_ids'] = array_keys($definitions);
+        $definitions['michel.controllers'] = static function (ContainerInterface $container) use ($controllers) {
+            $scanner = new ControllerFinder($controllers, $container->get('michel.current_cache'));
+            return $scanner->findControllerClasses();
+        };
+        $definitions['michel.routes'] = static function (ContainerInterface $container) use ($routes) {
+            $collector = null;
+            if (PHP_VERSION_ID >= 80000) {
+                $controllers = $container->get('michel.controllers');
+                $collector = new AttributeRouteCollector(
+                    $controllers,
+                    $container->get('michel.current_cache')
+                );
+            }
+            return array_merge($routes, $collector ? $collector->collect() : []);
+        };
 
         $this->container = $this->loadContainer($definitions);
         $this->debugDataCollector = $this->container->get(DebugDataCollector::class);
-        unset($services, $parameters, $listeners, $routes, $commands, $packages, $definitions);
+        unset($services, $parameters, $listeners, $routes, $commands, $packages, $controllers, $definitions);
     }
 
-    final private static function getAvailableEnvironments(): array
+    private static function getAvailableEnvironments(): array
     {
         return array_unique(array_merge(self::DEFAULT_ENVIRONMENTS, App::getCustomEnvironments()));
     }
 
-    final private static function putEnv(string $name, $value): void
+    private static function putEnv(string $name, $value): void
     {
-        putenv(sprintf('%s=%s', $name, $value));
+        putenv(sprintf('%s=%s', $name, is_bool($value) ? ($value ? '1' : '0') : $value));
         $_ENV[$name] = $value;
         $_SERVER[$name] = $value;
     }

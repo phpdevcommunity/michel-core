@@ -193,7 +193,11 @@ return [
              */
             public function get(string $id)
             {
-                return $this->definitions[$id] ?? null;
+                $value = $this->definitions[$id] ?? null;
+                if ($value instanceof Closure) {
+                    return $value($this);
+                }
+                return $value;
             }
 
             public function has(string $id): bool

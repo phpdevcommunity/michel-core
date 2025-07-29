@@ -86,7 +86,6 @@ final class MichelCorePackage implements PackageInterface
                 $routes = $container->get('michel.routes');
                 $router = new Router($routes, $container->get('app.url'));
                 unset($routes);
-
                 return $router;
             },
             DebugDataCollector::class => static function (ContainerInterface $container): DebugDataCollector {
@@ -175,7 +174,23 @@ final class MichelCorePackage implements PackageInterface
         return [];
     }
 
-    public function getCommands(): array
+    /**
+     * Return an array of controller sources to scan for attribute-based routes.
+     *
+     * Each source can be either:
+     * - A fully-qualified class name (FQCN), e.g. App\Controller\PingController::class
+     * - A directory path (string), e.g. __DIR__ . '/../src/Controller'
+     *
+     * This allows the router to scan specific controllers or entire folders.
+     *
+     * @return string[] Array of class names and/or absolute folder paths.
+     */
+    public function getControllerSources(): array
+    {
+        return [];
+    }
+
+    public function getCommandSources(): array
     {
         return [
             CacheClearCommand::class,

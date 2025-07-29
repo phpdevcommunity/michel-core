@@ -57,6 +57,19 @@ interface PackageInterface
     public function getRoutes(): array;
 
     /**
+     * Return an array of controller sources to scan for attribute-based routes.
+     *
+     * Each source can be either:
+     * - A fully-qualified class name (FQCN), e.g. App\Controller\PingController::class
+     * - A directory path (string), e.g. __DIR__ . '/../src/Controller'
+     *
+     * This allows the router to scan specific controllers or entire folders.
+     *
+     * @return string[] Array of class names and/or absolute folder paths.
+     */
+    public function getControllerSources(): array;
+
+    /**
      * Get the event listeners configuration.
      *
      * Example:
@@ -76,9 +89,15 @@ interface PackageInterface
     public function getListeners(): array;
 
     /**
-     * Get the console commands configuration.
+     * Return an array of sources to load console commands from.
      *
-     * @return array An array of console command class names.
+     * Each source can be:
+     * - A fully-qualified class name of a console command
+     * - A directory path (string) to scan for command classes
+     *
+     * This allows both direct registration and dynamic discovery.
+     *
+     * @return string[] Array of FQCNs and/or absolute folder paths.
      */
-    public function getCommands(): array;
+    public function getCommandSources(): array;
 }

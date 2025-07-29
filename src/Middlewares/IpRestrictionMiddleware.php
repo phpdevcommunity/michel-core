@@ -23,7 +23,6 @@ final class IpRestrictionMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $ip = IpHelper::getIpFromRequest($request);
-
         if (!$this->isIpAllowed($ip)) {
             return $this->responseFactory->createResponse(403, 'Forbidden');
         }

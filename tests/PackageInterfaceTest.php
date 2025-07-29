@@ -23,6 +23,7 @@ class PackageInterfaceTest extends TestCase
         $this->assertIsArray($package->getListeners());
 
         // Assert that the commands are of type array
-        $this->assertIsArray($package->getCommands());
+        $this->assertIsArray($package->getCommandSources());
+        $this->assertIsArray($package->getControllerSources());
     }
 }

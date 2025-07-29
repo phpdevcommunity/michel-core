@@ -3,6 +3,7 @@
 namespace Test\PhpDevCommunity\Michel\Core;
 
 use PhpDevCommunity\Michel\Core\Middlewares\ControllerMiddleware;
+use PhpDevCommunity\Route;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -20,27 +21,8 @@ class ControllerMiddlewareTest extends TestCase
         $request = $this->createMock(ServerRequestInterface::class);
 
         $request
-            ->expects($this->exactly(2))
             ->method('getAttribute')
-            ->willReturnCallback(function (string $key) {
-
-                if ($key === ControllerMiddleware::CONTROLLER) {
-                    return new SampleControllerTest([]);
-                }
-
-                if ($key === ControllerMiddleware::ACTION) {
-                    return null;
-                }
-
-                throw new \LogicException();
-            });
-
-        $request
-            ->method('getAttributes')
-            ->willReturn([
-                ControllerMiddleware::CONTROLLER => new SampleControllerTest([]),
-                ControllerMiddleware::ACTION => null
-            ]);
+            ->willReturn(new Route('example', '/example', [new SampleControllerTest([])]));
 
         $handler = $this->createMock(RequestHandlerInterface::class);
         $response = $controllerMiddleware->process($request, $handler);
@@ -70,27 +52,8 @@ class ControllerMiddlewareTest extends TestCase
         $controllerClassName = SampleControllerTest::class;
 
         $request
-            ->expects($this->exactly(2))
             ->method('getAttribute')
-            ->willReturnCallback(function (string $key)  use($controllerClassName, $controllerMethodName){
-
-                if ($key === ControllerMiddleware::CONTROLLER) {
-                    return $controllerClassName;
-                }
-
-                if ($key === ControllerMiddleware::ACTION) {
-                    return $controllerMethodName;
-                }
-
-                throw new \LogicException();
-            });
-
-        $request
-            ->method('getAttributes')
-            ->willReturn([
-                ControllerMiddleware::CONTROLLER => $controllerClassName,
-                ControllerMiddleware::ACTION => $controllerMethodName
-            ]);
+            ->willReturn(new Route('example', '/example', [$controllerClassName, $controllerMethodName]));
 
         $container->expects($this->once())
             ->method('get')

@@ -48,11 +48,16 @@ class MyPackageTest implements PackageInterface
         ];
     }
 
-    public function getCommands(): array
+    public function getCommandSources(): array
     {
         return [
             CacheClearCommand::class,
             MakeCommandCommand::class,
         ];
+    }
+
+    public function getControllerSources(): array
+    {
+        return [];
     }
 }

@@ -34,7 +34,7 @@
         "psr/http-factory": "^1.0",
         "psr/log": "^1.1|^2.0",
         "phpdevcommunity/php-dotenv": "^3.0",
-        "phpdevcommunity/php-router": "^3.0",
+        "phpdevcommunity/php-router": "^3.1",
         "phpdevcommunity/php-options-resolver": "^1.0",
         "phpdevcommunity/php-console": "^1.0",
         "phpdevcommunity/php-vardumper": "^1.0",

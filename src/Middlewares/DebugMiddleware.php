@@ -62,8 +62,8 @@ final class DebugMiddleware implements MiddlewareInterface
          * @var DebugDataCollector $debugCollector
          */
         $debugCollector = $request->getAttribute('debug_collector');
-        $debugCollector->add('response_code', $response->getStatusCode());
         if ($debugCollector) {
+            $debugCollector->add('response_code', $response->getStatusCode());
             $this->requestProfiler->withDebugDataCollector($debugCollector);
         }
         $requestProfilerData = $this->requestProfiler->stop();
@@ -128,6 +128,7 @@ final class DebugMiddleware implements MiddlewareInterface
         if (!is_dir($this->logDir)) {
             @mkdir($this->logDir, 0777, true);
         }
+
         if ($logFile === null) {
             $logFile = $this->env . '.log';
         }

@@ -25,6 +25,7 @@ class KernelTest extends TestCase
         putenv('APP_TIMEZONE');
         putenv('APP_LOCALE');
         putenv('APP_URL');
+        putenv('APP_DEBUG');
 
 
         date_default_timezone_set('UTC');
@@ -32,8 +33,11 @@ class KernelTest extends TestCase
     public function testLoadKernel()
     {
         $baseKernel = new SampleKernelTest('.env');
+
         $this->assertEquals('dev', $baseKernel->getEnv());
+        $this->assertEquals(true, $baseKernel->isDebug());
         $this->assertEquals('dev', getenv('APP_ENV'));
+        $this->assertEquals(0, getenv('APP_DEBUG'));
         $this->assertEquals('Europe/Paris', getenv('APP_TIMEZONE'));
         $this->assertEquals('fr', getenv('APP_LOCALE'));
         $this->assertEquals('http://localhost', getenv('APP_URL'));
@@ -71,6 +75,13 @@ class KernelTest extends TestCase
         $this->assertIsArray($container->get('michel.commands'));
         $this->assertIsArray($container->get('michel.listeners'));
         $this->assertIsArray($container->get('michel.routes'));
+        if (PHP_VERSION_ID >= 80000) {
+            $this->assertCount(3, $container->get('michel.routes'));
+        }else {
+            $this->assertCount(2, $container->get('michel.routes'));
+        }
+        $this->assertIsArray($container->get('michel.controllers'));
+        $this->assertCount(2, $container->get('michel.controllers'));
         $this->assertIsArray($container->get('michel.services_ids'));
         $this->assertEquals($baseKernel->getEnv(), $container->get('michel.environment'));
         $this->assertEquals($baseKernel->getEnv() === 'dev', $container->get('michel.debug'));
