@@ -7,6 +7,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 
@@ -82,6 +83,19 @@ if (!function_exists('create_request')) {
     }
 }
 
+if (!function_exists('request_factory')) {
+
+    /**
+     * Creates a new HTTP request.
+     *
+     * @return ServerRequestFactoryInterface The HTTP response.
+     */
+    function request_factory(): ServerRequestFactoryInterface
+    {
+        return App::getServerRequestFactory();
+    }
+}
+
 if (!function_exists('response_factory')) {
 
     /**
@@ -117,18 +131,23 @@ if (!function_exists('json_response')) {
     /**
      * Creates a new JSON response.
      *
-     * @param array $data The data to encode to JSON.
+     * @param array|JsonSerializable $data The data to encode to JSON.
      * @param int $status The HTTP status code.
      * @param int $flags JSON encoding flags.
      * @return ResponseInterface The JSON response.
      * @throws InvalidArgumentException If JSON encoding fails.
      */
-    function json_response(array $data, int $status = 200, int $flags = JSON_HEX_TAG
+    function json_response($data, int $status = 200, int $flags = JSON_HEX_TAG
     | JSON_HEX_APOS
     | JSON_HEX_AMP
     | JSON_HEX_QUOT
     | JSON_UNESCAPED_SLASHES): ResponseInterface
     {
+        if (!is_array($data) && !is_subclass_of($data, JsonSerializable::class)) {
+            throw new InvalidArgumentException(
+                'Data must be an array or implement JsonSerializable interface'
+            );
+        }
         $response = response_factory()->createResponse($status);
         $response->getBody()->write(json_encode($data, $flags));
         if (json_last_error() !== JSON_ERROR_NONE) {

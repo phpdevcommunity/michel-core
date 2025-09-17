@@ -65,9 +65,9 @@ final class RequestProfiler
             'event.duration' => $duration,
             'metrics' => [
                 'memory.usage' => $memoryUsage,
-                'memory.usage.human' => $this->convertMemory($memoryUsage),
+                'memory.usage.human' => _m_convert($memoryUsage),
                 'memory.peak' => $memoryPeak,
-                'memory.peak.human' => $this->convertMemory(memory_get_peak_usage(true)),
+                'memory.peak.human' => _m_convert(memory_get_peak_usage(true)),
                 'load_time.ms' => ceil($duration * 1000),
                 'load_time.s' => number_format($duration, 3),
             ],
@@ -84,11 +84,5 @@ final class RequestProfiler
                 'server' => $request->getServerParams(),
             ],
         ];
-    }
-
-    private function convertMemory(int $size): string
-    {
-        $unit = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
-        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
     }
 }

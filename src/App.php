@@ -8,6 +8,7 @@ use PhpDevCommunity\Resolver\Option;
 use PhpDevCommunity\Resolver\OptionsResolver;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -26,6 +27,9 @@ final class App
     {
         $resolver = new OptionsResolver([
             (new Option('server_request'))->validator(static function ($value) {
+                return $value instanceof \Closure;
+            }),
+            (new Option('server_request_factory'))->validator(static function ($value) {
                 return $value instanceof \Closure;
             }),
             (new Option('response_factory'))->validator(static function ($value) {
@@ -67,6 +71,12 @@ final class App
     public static function createServerRequest(): ServerRequestInterface
     {
         $serverRequest = self::getApp()->options['server_request'];
+        return $serverRequest();
+    }
+
+    public static function getServerRequestFactory(): ServerRequestFactoryInterface
+    {
+        $serverRequest = self::getApp()->options['server_request_factory'];
         return $serverRequest();
     }
 

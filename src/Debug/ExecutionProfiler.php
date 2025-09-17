@@ -50,18 +50,11 @@ final class ExecutionProfiler
                 'log.level' => 'debug',
                 'event.duration' => $duration,
                 'metrics' => [
-                    'memory.usage' => $this->convertMemory($memoryUsage),
-                    'peak_memory.usage' => $this->convertMemory(memory_get_peak_usage(true)),
+                    'memory.usage' => _m_convert($memoryUsage),
+                    'peak_memory.usage' => _m_convert(memory_get_peak_usage(true)),
                     'load_time.ms' => $duration * 1000,
                     'load_time.s' => number_format($duration, 3),
                 ],
             ] + $this->metadata;
-    }
-
-
-    private function convertMemory(int $size): string
-    {
-        $unit = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
-        return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
     }
 }

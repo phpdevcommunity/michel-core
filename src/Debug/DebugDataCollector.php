@@ -32,5 +32,4 @@ final class DebugDataCollector
     {
         return $this->data;
     }
-
 }
