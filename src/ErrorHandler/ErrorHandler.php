@@ -17,7 +17,7 @@ final class ErrorHandler
         \error_reporting(E_ALL);
         ini_set("display_errors", '1');
         ini_set("display_startup_errors", '1');
-        ini_set("html_errors", '1');
+        ini_set('html_errors', (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg') ? '0' : '1');
 
         $handler = new self();
         set_error_handler($handler);
