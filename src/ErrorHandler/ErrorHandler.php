@@ -15,8 +15,8 @@ final class ErrorHandler
     public static function register(): self
     {
         \error_reporting(E_ALL);
-        ini_set("display_errors", '1');
-        ini_set("display_startup_errors", '1');
+        ini_set("display_errors", '0');
+        ini_set("display_startup_errors", '0');
         ini_set('html_errors', (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg') ? '0' : '1');
 
         $handler = new self();
@@ -34,9 +34,7 @@ final class ErrorHandler
             return;
         }
 
-        if (in_array($level, [E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE, E_USER_ERROR], true)) {
-            throw new ErrorException($message, 0, $level, $file, $line);
-        }
+        throw new ErrorException($message, 0, $level, $file, $line);
     }
 
     public function clean(): void
