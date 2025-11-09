@@ -4,7 +4,7 @@ namespace Test\PhpDevCommunity\Michel\Core\Package;
 
 use PhpDevCommunity\Michel\Core\Command\CacheClearCommand;
 use PhpDevCommunity\Michel\Core\Command\MakeCommandCommand;
-use PhpDevCommunity\Michel\Core\Package\PackageInterface;
+use PhpDevCommunity\Michel\Package\PackageInterface;
 use PhpDevCommunity\Route;
 use PhpDevCommunity\RouterInterface;
 use Psr\Container\ContainerInterface;

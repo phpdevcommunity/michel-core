@@ -21,6 +21,7 @@ use PhpDevCommunity\Michel\Core\Middlewares\DebugMiddleware;
 use PhpDevCommunity\Michel\Core\Middlewares\ForceHttpsMiddleware;
 use PhpDevCommunity\Michel\Core\Middlewares\IpRestrictionMiddleware;
 use PhpDevCommunity\Michel\Core\Middlewares\MaintenanceMiddleware;
+use PhpDevCommunity\Michel\Package\PackageInterface;
 use PhpDevCommunity\Route;
 use PhpDevCommunity\Router;
 use PhpDevCommunity\RouterInterface;
